@@ -1,5 +1,29 @@
 ﻿@inherits FluxorComponent
+@inject IState<GameState> GameState
 
-<div>
-    <p>Round</p>
-</div>
+@if (GameState.Value.Game.PreviousRounds != null && GameState.Value.Game.PreviousRounds.Any())
+{
+    <label class="font-weight-bold">Rounds #@((GameState.Value.Game.PreviousRounds?.Count ?? 0) + 1)</label>
+}
+
+@if (GameState.Value.Game.CurrentRound != null)
+{
+    <Card Type="CardType.Prompt" Text="@GameState.Value.Game.CurrentRound.Prompt"></Card>
+
+    <p><i>Don't fancy this prompt?</i></p>
+    <form>
+        <div class="form-group">
+            <button type="button" class="btn btn-primary">Choose another</button>
+            <button type="button" class="btn btn-primary">Start again</button>
+        </div>
+    </form>
+}
+else
+{
+    <p>No fun has begun</p>
+    <form>
+        <div class="form-group">
+            <button type="button" class="btn btn-primary">New Round</button>
+        </div>
+    </form>
+}

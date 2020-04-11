@@ -1,0 +1,32 @@
+﻿@inherits FluxorComponent
+
+<div class="@ClassName" style="max-width: 18rem;">
+    <div class="card-body text-left">
+        <h5 class="card-title">@Text</h5>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public CardType Type { get; set; }
+
+    [Parameter]
+    public string Text { get; set; }
+
+    public string ClassName { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        switch (Type)
+        {
+            case CardType.Prompt:
+                ClassName = "card text-white black-bg mb-3";
+                break;
+            default:
+                ClassName = "card white-bg mb-3";
+                break;
+        }
+
+        return Task.CompletedTask;
+    }
+}
