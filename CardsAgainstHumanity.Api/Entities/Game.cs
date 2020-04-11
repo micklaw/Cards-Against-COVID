@@ -1,0 +1,144 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CardsAgainstHumanity.Api.Models;
+using CardsAgainstHumanity.Application.Extensions;
+using CardsAgainstHumanity.Application.Interfaces;
+using CardsAgainstHumanity.Application.Models;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+
+namespace CardsAgainstHumanity.Application.State
+{
+    public class Game : IGame
+    {
+        public string Url { get; set; }
+
+        public string Name { get; set; }
+
+        public string Code { get; set; }
+
+        public int CardCount { get; set; } = 7;
+
+        public IList<Player> Players { get; set; } = new List<Player>();
+
+        public Round CurrentRound { get; set; }
+
+        public IList<Round> PreviousRounds { get; set; } = new List<Round>();
+
+        public bool IsOpen { get; set; } = true;
+
+        public bool IsOver { get; set; }
+
+        public Dictionary<string, int> Score => PreviousRounds?.GroupBy(i => i.WonBy).ToDictionary(i => Players?.First(p => p.Id == i.Key)?.Name ?? "Unknown", i => i.Count());
+
+        public Game GetOrCreate(string name)
+        {
+            if (string.IsNullOrWhiteSpace(Url))
+            {
+                Url = name.Slugify();
+                Name = name;
+                Code = RandomX.Get().ToString();
+            }
+
+            return this;
+        }
+
+        public Game Open()
+        {
+            IsOpen = true;
+            return this;
+        }
+
+        public Game Close()
+        {
+            IsOpen = false;
+            return this;
+        }
+
+        public Game Finish()
+        {
+            IsOver = true;
+            return this;
+        }
+
+        public Game RevealRound()
+        {
+            CurrentRound?.Reveal();
+            return this;
+        }
+
+        public Game AddPlayer(AddPlayerModel model)
+        {
+            if (!IsOpen || IsOver)
+            {
+                return this;
+            }
+
+            int count = Players.Count();
+            var player = new Player(++count, model.PlayerName)
+            {
+                Cards = model.Responses
+            };
+
+            Players.Add(player);
+            return this;
+        }
+
+        public Game NewRound(string prompt)
+        {
+            CurrentRound = new Round()
+            {
+                Prompt = prompt
+            };
+
+            return this;
+        }
+
+        public Game NextRound(string prompt)
+        {
+            if (CurrentRound == null || CurrentRound.WonBy <= 0)
+            {
+                return this;
+            }
+
+            if (PreviousRounds == null)
+            {
+                PreviousRounds = new List<Round>();
+            }
+
+            PreviousRounds.Add(CurrentRound);
+
+            return NewRound(prompt);
+        }
+
+        public Game Vote(VoteModel model)
+        {
+            CurrentRound?.Vote(model.PlayerId, model.VoteeId);
+            return this;
+        }
+
+        public Game NewPrompt(string prompt)
+        {
+            CurrentRound?.NewPrompt(prompt);
+            return this;
+        }
+
+        public Game ShufflePlayerCards(ShufflePlayerCardsModel model)
+        {
+            Player player = Players.First(i => i.Id == model.PlayerId);
+            player.Shuffle(model.Responses);
+            return this;
+        }
+
+        public Game Respond(RespondModel model)
+        {
+            CurrentRound?.Respond(model.PlayerId, model.Responses);
+            return this;
+        }
+
+        [FunctionName(nameof(Game))]
+        public static Task Run([EntityTrigger] IDurableEntityContext ctx)
+            => ctx.DispatchAsync<Game>();
+    }
+}

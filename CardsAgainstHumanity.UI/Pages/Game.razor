@@ -1,0 +1,54 @@
+﻿@page "/game/{instance}"
+@using CardsAgainstHumanity.UI.State.Games.Actions
+@using Microsoft.AspNetCore.Connections
+@using Microsoft.AspNetCore.Http.Connections
+@inherits FluxorComponent
+@inject IState<GameState> GameState
+@inject IDispatcher Dispatcher
+
+@if (GameState?.Value?.Game != null)
+{
+    <GameTabs></GameTabs>
+}
+else
+{
+    <div class="aligner">
+        <main role="main" class="inner cover">
+            loading...
+        </main>
+    </div>
+}
+
+@code
+{
+    [Parameter]
+    public string Instance { get; set; }
+
+    private HubConnection hubConnection;
+
+    private bool IsConnected => hubConnection.State == HubConnectionState.Connected;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (GameState.Value.Game == null)
+        {
+            Dispatcher.Dispatch(new GetOrCreateGameAction(Instance));
+        }
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("http://localhost:7071/api", options =>
+            {
+                options.Transports = HttpTransportType.LongPolling;
+                options.DefaultTransferFormat = TransferFormat.Text;
+            })
+            .Build();
+
+        hubConnection.On<State.Games.Models.Game>("gameUpdated", i =>
+        {
+            Console.WriteLine(i);
+            Dispatcher.Dispatch(new UpdateGameStateAction(i));
+        });
+
+        await hubConnection.StartAsync();
+    }
+}

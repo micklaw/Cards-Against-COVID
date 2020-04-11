@@ -1,0 +1,34 @@
+﻿@page "/"
+@using CardsAgainstHumanity.UI.State.Games.Actions
+@inherits FluxorComponent
+@inject IDispatcher Dispatcher
+
+<div class="aligner">
+    <main role="main" class="inner cover">
+        <h1 class="cover-heading">Cards against humanity.</h1>
+        <div class="row text-center">
+            <div class="col-lg">
+                <div class="form-group">
+                    <p>Start a new game or join and existing one?</p>
+                    <input type="email" maxlength="50" class="form-control" placeholder="Game name e.g Saville's gallant few" @bind="GameName">
+                </div>
+                <button type="submit" class="btn btn-primary" @onclick="InitiateGame">Start</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+@code
+{
+    private string GameName { get; set; }
+
+    private Task InitiateGame(MouseEventArgs e)
+    {
+        if (!string.IsNullOrWhiteSpace(GameName))
+        {
+            Dispatcher.Dispatch(new GetOrCreateGameAction(GameName));
+        }
+
+        return Task.CompletedTask;
+    }
+}

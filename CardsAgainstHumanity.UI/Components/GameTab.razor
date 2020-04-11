@@ -1,0 +1,16 @@
+﻿@inherits FluxorComponent
+
+<div class="@ClassName">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public Tab Tab { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string ClassName { get; set; } = "hidden";
+}
