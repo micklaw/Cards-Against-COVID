@@ -1,17 +1,18 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.WebAssembly.Hosting
 @inherits FluxorComponent
 @inject IDispatcher Dispatcher
 
 <div class="aligner">
     <main role="main" class="inner cover">
-        <h1 class="cover-heading">Cards against humanity.</h1>
+        <h1 class="cover-heading">Cards Against COVID-19.</h1>
         <div class="row text-center">
             <div class="col-lg">
                 <div class="form-group">
                     <p>Start a new game or join and existing one?</p>
-                    <input type="email" maxlength="50" class="form-control" placeholder="Game name e.g Saville's gallant few" @bind="GameName">
+                    <input type="email" maxlength="50" class="form-control" placeholder="Try and be funny, I know it's hard for you..." @bind="GameName">
                 </div>
-                <button type="submit" class="btn btn-primary" @onclick="InitiateGame">Start</button>
+                <button type="submit" class="btn btn-primary" @onclick="InitiateGame">Fun</button>
             </div>
         </div>
     </main>

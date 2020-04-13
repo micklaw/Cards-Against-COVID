@@ -1,14 +1,31 @@
-﻿@inherits FluxorComponent
+﻿@using System.Threading
+@inherits FluxorComponent
 @inject IState<GameState> GameState
-
-@if (GameState.Value.Game.PreviousRounds != null && GameState.Value.Game.PreviousRounds.Any())
-{
-    <label class="font-weight-bold">Rounds #@((GameState.Value.Game.PreviousRounds?.Count ?? 0) + 1)</label>
-}
 
 @if (GameState.Value.Game.CurrentRound != null)
 {
+    <h5 class="font-weight-bold">Prompt</h5>
     <Card Type="CardType.Prompt" Text="@GameState.Value.Game.CurrentRound.Prompt"></Card>
+
+    @if (ViewingResponses != null && ViewingResponses.Any())
+    {
+        <h5 class="font-weight-bold">Response</h5>
+
+        <ul class="list-unstyled justify-content-center">
+            @foreach (var response in ViewingResponses)
+            {
+                <li class="response-list">
+                    <Card Type="CardType.Response" Text="@response"></Card>
+
+                    <div class="invisible">
+                        .
+                    </div>
+                </li>
+            }
+        </ul>
+
+        <p><button type="button" class="btn btn-primary mb-3" @onclick="CloseResponses">Close</button></p>
+    }
 
     <p><i>Don't fancy this prompt?</i></p>
     <form>
@@ -17,6 +34,40 @@
             <button type="button" class="btn btn-primary">Start again</button>
         </div>
     </form>
+
+    <h5 class="font-weight-bold">Votes</h5>
+
+    @if (GameState.Value.Game.CurrentRound.Responses != null && GameState.Value.Game.CurrentRound.Responses.Any())
+    {
+        <table class="table table-sm table-dark">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th class="text-right">Votes</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var response in GameState.Value.Game.CurrentRound.Responses)
+                {
+                    <tr>
+                        <td>@GameState.Value.GetPlayerName(response.PlayerId, true)</td>
+                        <td class="text-right">@GameState.Value.GetCurrentRoundPlayerVotes(response.PlayerId)</td>
+                        <td>
+                            <div class="float-right">
+                                <button type="button" class="btn btn-sm btn-primary" @onclick="(e) => ViewResponses(e, response.PlayerId, response.Responses)">View</button>
+                                <button type="button" class="btn btn-sm btn-primary">Vote</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No responses yet, hurry up</p>
+    }
 }
 else
 {
@@ -26,4 +77,40 @@ else
             <button type="button" class="btn btn-primary">New Round</button>
         </div>
     </form>
+}
+
+@code
+{
+    public List<string> ViewingResponses { get; set; } = new List<string>();
+    public string ViewingResponsesPlayerName { get; set; }
+
+    private void CloseResponses(MouseEventArgs e)
+    {
+        ViewingResponses = new List<string>();
+    }
+
+    private void ViewResponses(MouseEventArgs e, int playerId, IList<int> responses)
+    {
+        var cards = GameState.Value.Game.Players.FirstOrDefault(i => i.Id == playerId)?.Cards?.ToArray();
+        ViewingResponses = new List<string>();
+        ViewingResponsesPlayerName = GameState.Value.GetPlayerName(playerId, true);
+
+        if (cards == null)
+        {
+            StateHasChanged();
+            return;
+        }
+
+        foreach (var index in responses)
+        {
+            if (cards.Length < (index - 1))
+            {
+                continue;
+            }
+
+            ViewingResponses.Add(cards[index - 1]);
+        }
+
+        StateHasChanged();
+    }
 }

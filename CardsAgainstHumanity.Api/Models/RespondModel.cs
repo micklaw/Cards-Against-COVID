@@ -8,6 +8,6 @@ namespace CardsAgainstHumanity.Api.Models
     {
         public int PlayerId { get; set; }
 
-        public List<string> Responses { get; set; }
+        public List<int> Responses { get; set; }
     }
 }

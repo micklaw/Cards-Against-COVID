@@ -7,6 +7,6 @@ namespace CardsAgainstHumanity.Application.Models
     {
         public int PlayerId { get; set; }
 
-        public IList<string> Responses { get; set; } = new List<string>();
+        public IList<int> Responses { get; set; } = new List<int>();
     }
 }

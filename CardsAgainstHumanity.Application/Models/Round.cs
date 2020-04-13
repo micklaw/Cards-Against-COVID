@@ -7,11 +7,13 @@ namespace CardsAgainstHumanity.Application.Models
     {
         public string Prompt { get; set; }
 
-        public IList<Response> Responses { get; set; }
+        public IList<Response> Responses { get; set; } = new List<Response>();
 
         public IList<int> Voted { get; set; } = new List<int>();
 
         public IList<int> Votes { get; set; } = new List<int>();
+
+        public bool IsWon => WonBy > 0;
 
         public int WonBy { get; set; }
 
@@ -31,6 +33,11 @@ namespace CardsAgainstHumanity.Application.Models
 
         public void Vote(int voterId, int id)
         {
+            if (Responses == null)
+            {
+                Responses = new List<Response>();
+            }
+
             if (Responses.All(i => i.PlayerId != id))
             {
                 return;
@@ -45,9 +52,14 @@ namespace CardsAgainstHumanity.Application.Models
             Votes.Add(id);
         }
 
-        public void Respond(int responderId, List<string> responses)
+        public void Respond(int responderId, List<int> responses)
         {
-            var response = Responses.FirstOrDefault(i => i.PlayerId == responderId);
+            if (Responses == null)
+            {
+                Responses = new List<Response>();
+            }
+
+            var response = Responses?.FirstOrDefault(i => i.PlayerId == responderId);
 
             if (response != null)
             {

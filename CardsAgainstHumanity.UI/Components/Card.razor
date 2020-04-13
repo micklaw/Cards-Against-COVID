@@ -1,6 +1,6 @@
 ﻿@inherits FluxorComponent
 
-<div class="@ClassName" style="max-width: 18rem;">
+<div class="shadow @ClassName mb-3">
     <div class="card-body text-left">
         <h5 class="card-title">@Text</h5>
     </div>
@@ -20,10 +20,10 @@
         switch (Type)
         {
             case CardType.Prompt:
-                ClassName = "card text-white black-bg mb-3";
+                ClassName = "card text-white black-bg";
                 break;
             default:
-                ClassName = "card white-bg mb-3";
+                ClassName = "card white-bg";
                 break;
         }
 

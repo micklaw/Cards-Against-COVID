@@ -31,8 +31,10 @@ else
             Dispatcher.Dispatch(new GetOrCreateGameAction(Instance));
         }
 
+        var apiUrl = Config["apiUri"];
+
         hubConnection = new HubConnectionBuilder()
-            .WithUrl(Config["apiUrl"], options =>
+            .WithUrl(apiUrl, options =>
             {
                 options.Transports = HttpTransportType.LongPolling;
                 options.DefaultTransferFormat = TransferFormat.Text;

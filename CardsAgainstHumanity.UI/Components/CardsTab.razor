@@ -1,5 +1,49 @@
 ﻿@inherits FluxorComponent
+@inject IState<GameState> GameState
 
-<div>
-    <p>Cards</p>
-</div>
+@if (GameState.Value.CurrentPlayer != null)
+{
+    <h5 class="font-weight-bold">@(GameState.Value.CurrentPlayer.Name)s Responses</h5>
+
+    @if (GameState.Value.CurrentPlayer.Cards != null && GameState.Value.CurrentPlayer.Cards.Any())
+    {
+
+        <ul class="list-unstyled justify-content-center">
+            @foreach (var response in GameState.Value.CurrentPlayer.Cards)
+            {
+                <li class="response-list">
+                    <Card Type="CardType.Response" Text="@response"></Card>
+
+                    <form>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-sm btn-primary">Select</button>
+                            <button type="button" class="btn btn-sm btn-primary">Replace</button>
+                        </div>
+                    </form>
+                </li>
+            }
+        </ul>
+    }
+
+    <p><i>These cards are pish, replace them all?</i></p>
+    <form>
+        <div class="form-group">
+            <button type="button" class="btn btn-primary">Replace all</button>
+        </div>
+    </form>
+
+}
+else
+{
+    <p>No cards and no life, what a loser</p>
+    <form>
+        <div class="form-group">
+            <button type="button" class="btn btn-primary">Join Game</button>
+        </div>
+    </form>
+}
+
+@code
+{
+
+}
