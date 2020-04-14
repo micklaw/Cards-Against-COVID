@@ -7,7 +7,11 @@
         <nav class="nav nav-masthead justify-content-center">
             @foreach (var tab in Tabs)
             {
-                @if (!GameState.Value.PartOfCurrentGame && tab.Tab == Tab.Cards)
+                @if (tab.Tab == Tab.Cards && (!GameState.Value.PartOfCurrentGame || GameState.Value.Game.IsOver))
+                {
+                    continue;
+                }
+                @if (tab.Tab == Tab.Round && GameState.Value.Game.IsOver)
                 {
                     continue;
                 }

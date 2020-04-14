@@ -32,8 +32,6 @@ namespace CardsAgainstHumanity.UI.State.Games.Effects
 
             if (player != null)
             {
-                Console.WriteLine(player.Id);
-
                 await this.localStorage.SetItemAsync(game.Url, player.Id);
             }
 

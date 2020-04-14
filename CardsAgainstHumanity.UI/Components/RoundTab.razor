@@ -4,14 +4,13 @@
 
 @if (GameState.Value.Game.CurrentRound != null)
 {
-    <h5 class="font-weight-bold">Prompt</h5>
-    <Card Type="CardType.Prompt" Text="@GameState.Value.Game.CurrentRound.Prompt"></Card>
+    <div class="mt-2">
+        <Card Type="CardType.Prompt" Text="@GameState.Value.Game.CurrentRound.Prompt"></Card>
+    </div>
 
     @if (ViewingResponses != null && ViewingResponses.Any())
     {
-        <h5 class="font-weight-bold">Response</h5>
-
-        <ul class="list-unstyled justify-content-center">
+        <ul class="list-unstyled justify-content-center mt-1">
             @foreach (var response in ViewingResponses)
             {
                 <li class="response-list">
@@ -59,7 +58,7 @@
                         <td>
                             <div class="float-right">
                                 <button type="button" class="btn btn-sm btn-primary" @onclick="(e) => ViewResponses(e, response.PlayerId, response.Responses)">View</button>
-                                @if (GameState.Value.PartOfCurrentGame)
+                                @if (GameState.Value.PartOfCurrentGame && !GameState.Value.HasVoted)
                                 {
                                     <button type="button" class="btn btn-sm btn-primary" @onclick="(e) => Vote(e, response.PlayerId, GameState.Value.CurrentPlayer.Id)">Vote</button>
                                 }

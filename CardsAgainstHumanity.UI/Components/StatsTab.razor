@@ -38,7 +38,7 @@ else
 @if (!GameState.Value.Game.IsOver)
 {
     <h5 class="font-weight-bold">Actions</h5>
-    <form class="mt-1">
+    <form class="mt-2">
         @if (GameState.Value.Game.IsOpen && !GameState.Value.PartOfCurrentGame)
         {
             <div class="form-group">
@@ -52,17 +52,11 @@ else
         }
         else if (GameState.Value.Game.IsOpen && GameState.Value.PartOfCurrentGame)
         {
-            <div class="alert alert-primary mt-1" role="alert">
+            <div class="alert alert-primary mt-2" role="alert">
                 Currently playing as <strong>@GameState.Value.CurrentPlayer.Name</strong>.
             </div>
         }
-        else if (!GameState.Value.Game.IsOpen)
-        {
-            <div class="alert alert-warning mt-1" role="alert">
-                <strong>Games shut!</strong> Fuck off.
-            </div>
-        }
-        <div class="form-group">
+        <div class="form-group mt-2">
             @if (!GameState.Value.Game.IsOpen)
             {
                 <button type="button" class="btn btn-success" @onclick="Open">Open  <span class="iconify" data-icon="oi:lock-unlocked" data-inline="false"></span></button>
@@ -77,10 +71,19 @@ else
 }
 else
 {
-    <div class="alert alert-primary mt-1" role="alert">
-        <strong>Game's over!</strong> Just like your sex life, you sad individual.
-    </div>
-}
+    if (GameState.Value.OverallWinner == null)
+    {
+        <div class="alert alert-primary mt-3" role="alert">
+            Game over!, glory belongs too no-one, because you all suck.<strong></strong> .
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-primary mt-3" role="alert">
+            Game over!, glory belongs too <strong>@GameState.Value.OverallWinner.Name</strong> .
+        </div>
+        //}
+    }
 
 @code {
     public string PlayerName { get; set; }

@@ -2,76 +2,76 @@
 @inject IState<GameState> GameState
 @inject IDispatcher Dispatcher
 
-@if (GameState.Value.CurrentPlayer != null)
-{
-    <h5 class="font-weight-bold">@(GameState.Value.CurrentPlayer.Name)s Responses</h5>
-
-    @if (GameState.Value.CurrentPlayer.Cards != null && GameState.Value.CurrentPlayer.Cards.Any())
+<div class="mt-2">
+    @if (GameState.Value.CurrentPlayer != null)
     {
-        <ul class="list-unstyled justify-content-center">
-            @foreach (var response in GameState.Value.CurrentPlayer.Cards.Select((i, v) => new { Item = i, Index = v }))
-            {
-                <li class="response-list">
-                    <Card Type="CardType.Response" Text="@response.Item"></Card>
+        @if (GameState.Value.CurrentPlayer.Cards != null && GameState.Value.CurrentPlayer.Cards.Any())
+        {
+            <ul class="list-unstyled justify-content-center">
+                @foreach (var response in GameState.Value.CurrentPlayer.Cards.Select((i, v) => new { Item = i, Index = v }))
+                {
+                    <li class="response-list">
+                        <Card Type="CardType.Response" Text="@response.Item"></Card>
 
-                    <form>
-                        <div class="form-group">
-                            @if (!GameState.Value.CurrentResponses.Contains(response.Index) && !SelectedResponses.Contains(response.Index))
-                            {
-                                <button type="button" class="btn btn-sm btn-primary" @onclick="(e) => Toggle(e, response.Index)">Select</button>
-                                <button type="button" class="btn btn-sm btn-primary" @onclick="(e) => Replace(e, response.Index)">Replace</button>
-                            }
-                            else if (SelectedResponses.Contains(response.Index))
-                            {
-                                <button type="button" class="btn btn-sm btn-warning" @onclick="(e) => Toggle(e, response.Index)">Remove</button>
-                            }
-                            else
-                            {
-                                <button type="button" class="btn btn-sm btn-info" disabled="disabled">Played</button>
-                            }
-                        </div>
-                    </form>
-                </li>
-            }
-        </ul>
+                        <form>
+                            <div class="form-group">
+                                @if (!GameState.Value.CurrentResponses.Contains(response.Index) && !SelectedResponses.Contains(response.Index))
+                                {
+                                    <button type="button" class="btn btn-sm btn-primary" @onclick="(e) => Toggle(e, response.Index)">Select</button>
+                                    <button type="button" class="btn btn-sm btn-primary" @onclick="(e) => Replace(e, response.Index)">Replace</button>
+                                }
+                                else if (SelectedResponses.Contains(response.Index))
+                                {
+                                    <button type="button" class="btn btn-sm btn-warning" @onclick="(e) => Toggle(e, response.Index)">Remove</button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-sm btn-info" disabled="disabled">Played</button>
+                                }
+                            </div>
+                        </form>
+                    </li>
+                }
+            </ul>
+        }
+
+        @if (!GameState.Value.CurrentResponses.Any() && !SelectedResponses.Any())
+        {
+            <p><i>These cards are pish, replace them all?</i></p>
+            <form>
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary" @onclick="ReplaceAll">Replace all</button>
+                </div>
+            </form>
+        }
+        else if (GameState.Value.CurrentResponses.Any() && !SelectedResponses.Any())
+        {
+            <form>
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary" @onclick="ResetResponse">Reset all</button>
+                </div>
+            </form>
+        }
+        else if (SelectedResponses.Any())
+        {
+            <form>
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary" @onclick="Vote">Vote</button>
+                </div>
+            </form>
+        }
+
     }
-
-    @if (!GameState.Value.CurrentResponses.Any() && !SelectedResponses.Any())
+    else
     {
-        <p><i>These cards are pish, replace them all?</i></p>
+        <p>You nosey bastard you!</p>
         <form>
             <div class="form-group">
-                <button type="button" class="btn btn-primary" @onclick="ReplaceAll">Replace all</button>
+                <a href="/">Away and find some of your own mates</a>
             </div>
         </form>
     }
-    else if (GameState.Value.CurrentResponses.Any() && !SelectedResponses.Any())
-    {
-        <form>
-            <div class="form-group">
-                <button type="button" class="btn btn-primary" @onclick="ResetResponse">Reset all</button>
-            </div>
-        </form>
-    }
-    else if (SelectedResponses.Any())
-    {
-        <form>
-            <div class="form-group">
-                <button type="button" class="btn btn-primary" @onclick="Vote">Vote</button>
-            </div>
-        </form>
-    }
-
-}
-else
-{
-    <p>You nosey bastard you!</p>
-    <form>
-        <div class="form-group">
-            <a href="/">Away and find some of your own mates</a>
-        </div>
-    </form>
-}
+</div>
 
 @code
 {

@@ -25,6 +25,10 @@ namespace CardsAgainstHumanity.UI.State.Games
         public int RoundCount { get; set; }
 
         public IList<int> CurrentResponses { get; set; }
+        
+        public bool HasVoted { get; set; }
+
+        public Player OverallWinner { get; set; }
 
         public string GetPlayerName(int playerId, bool useIsWon = false)
         {
