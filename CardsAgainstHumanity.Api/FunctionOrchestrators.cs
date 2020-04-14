@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using CardsAgainstHumanity.Api.Extensions;
 using CardsAgainstHumanity.Api.Models;
+using CardsAgainstHumanity.Application.Models.Api;
 using CardsAgainstHumanity.Application.State;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -41,6 +42,12 @@ namespace CardsAgainstHumanity.Api
 
         [FunctionName(nameof(Game.ShufflePlayerCards))]
         public Task<Game> ShufflePlayerCards([OrchestrationTrigger] IDurableOrchestrationContext context) => context.Operate<ShufflePlayerCardsModel, Game>(nameof(Game.ShufflePlayerCards));
+
+        [FunctionName(nameof(Game.ReplacePlayerCard))]
+        public Task<Game> ReplacePlayerCard([OrchestrationTrigger] IDurableOrchestrationContext context) => context.Operate<ReplacePlayerCardRequest, Game>(nameof(Game.ReplacePlayerCard));
+
+        [FunctionName(nameof(Game.ResetResponse))]
+        public Task<Game> ResetResponse([OrchestrationTrigger] IDurableOrchestrationContext context) => context.Operate<ResetResponseRequest, Game>(nameof(Game.ResetResponse));
 
         [FunctionName(nameof(Game.Respond))]
         public Task<Game> Respond([OrchestrationTrigger] IDurableOrchestrationContext context) => context.Operate<RespondModel, Game>(nameof(Game.Respond));

@@ -1,6 +1,6 @@
-﻿@using System.Threading
-@inherits FluxorComponent
+﻿@inherits FluxorComponent
 @inject IState<GameState> GameState
+@inject IDispatcher Dispatcher
 
 @if (GameState.Value.Game.CurrentRound != null)
 {
@@ -27,17 +27,20 @@
         <p><button type="button" class="btn btn-primary mb-3" @onclick="CloseResponses">Close</button></p>
     }
 
-    <p><i>Don't fancy this prompt?</i></p>
-    <form>
-        <div class="form-group">
-            <button type="button" class="btn btn-primary">Choose another</button>
-            <button type="button" class="btn btn-primary">Start again</button>
-        </div>
-    </form>
+    @if (GameState.Value.PartOfCurrentGame)
+    {
+        <p><i>Don't fancy this prompt?</i></p>
+        <form>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" @onclick="NewPrompt">Choose another</button>
+                <button type="button" class="btn btn-primary" @onclick="NewRound">Start again</button>
+            </div>
+        </form>
+    }
 
     <h5 class="font-weight-bold">Votes</h5>
 
-    @if (GameState.Value.Game.CurrentRound.Responses != null && GameState.Value.Game.CurrentRound.Responses.Any())
+    @if (GameState.Value.Game.CurrentRound.HasResponses)
     {
         <table class="table table-sm table-dark">
             <thead>
@@ -56,13 +59,32 @@
                         <td>
                             <div class="float-right">
                                 <button type="button" class="btn btn-sm btn-primary" @onclick="(e) => ViewResponses(e, response.PlayerId, response.Responses)">View</button>
-                                <button type="button" class="btn btn-sm btn-primary">Vote</button>
+                                @if (GameState.Value.PartOfCurrentGame)
+                                {
+                                    <button type="button" class="btn btn-sm btn-primary" @onclick="(e) => Vote(e, response.PlayerId, GameState.Value.CurrentPlayer.Id)">Vote</button>
+                                }
                             </div>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
+
+        @if (GameState.Value.PartOfCurrentGame)
+        {
+            <form>
+                <div class="form-group">
+                    @if (!GameState.Value.Game.CurrentRound.IsWon && GameState.Value.Game.CurrentRound.HasResponses)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="Reveal">Show winner</button>
+                    }
+                    @if (GameState.Value.Game.CurrentRound.IsWon)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="Next">Next round</button>
+                    }
+                </div>
+            </form>
+        }
     }
     else
     {
@@ -72,11 +94,15 @@
 else
 {
     <p>No fun has begun</p>
-    <form>
-        <div class="form-group">
-            <button type="button" class="btn btn-primary">New Round</button>
-        </div>
-    </form>
+
+    @if (GameState.Value.PartOfCurrentGame)
+    {
+        <form>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" @onclick="NewRound">New Round</button>
+            </div>
+        </form>
+    }
 }
 
 @code
@@ -103,14 +129,39 @@ else
 
         foreach (var index in responses)
         {
-            if (cards.Length < (index - 1))
+            if (cards.Length < (index))
             {
                 continue;
             }
 
-            ViewingResponses.Add(cards[index - 1]);
+            ViewingResponses.Add(cards[index]);
         }
 
         StateHasChanged();
+    }
+
+    private void NewRound(MouseEventArgs mouseEventArgs)
+    {
+        Dispatcher.Dispatch(new NewRoundAction(GameState.Value.Game.Url));
+    }
+
+    private void NewPrompt(MouseEventArgs obj)
+    {
+        Dispatcher.Dispatch(new NewRoundPromptAction(GameState.Value.Game.Url));
+    }
+
+    private void Reveal(MouseEventArgs obj)
+    {
+        Dispatcher.Dispatch(new RoundRevealAction(GameState.Value.Game.Url));
+    }
+
+    private void Next(MouseEventArgs obj)
+    {
+        Dispatcher.Dispatch(new NextRoundAction(GameState.Value.Game.Url));
+    }
+
+    private void Vote(MouseEventArgs mouseEventArgs, in int responsePlayerId, in int currentPlayerId)
+    {
+        Dispatcher.Dispatch(new RoundVoteAction(GameState.Value.Game.Url, currentPlayerId, responsePlayerId));
     }
 }

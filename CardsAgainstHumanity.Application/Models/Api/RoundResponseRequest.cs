@@ -9,6 +9,6 @@ namespace CardsAgainstHumanity.Application.Models.Api
         public int PlayerId { get; set; }
 
         [JsonProperty("responses")]
-        public IList<string> Responses { get; set; }
+        public IList<int> Responses { get; set; }
     }
 }

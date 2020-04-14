@@ -1,8 +1,10 @@
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using CardsAgainstHumanity.Api.Extensions;
 using CardsAgainstHumanity.Api.Models;
 using CardsAgainstHumanity.Application.Interfaces;
+using CardsAgainstHumanity.Application.Models.Api;
 using CardsAgainstHumanity.Application.Services;
 using CardsAgainstHumanity.Application.State;
 using Microsoft.AspNetCore.Http;
@@ -114,6 +116,27 @@ namespace CardsAgainstHumanity.Api
             var model = await req.Body<ShufflePlayerCardsModel>();
             model.Responses = this.cardService.ShuffleResponses();
             return await context.Orchestrate(req, nameof(Game.ShufflePlayerCards), model, gameEvents);
+        }
+
+        [FunctionName(nameof(ReplacePlayerCardTrigger))]
+        public async Task<IActionResult> ReplacePlayerCardTrigger(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/card/replace")] HttpRequest req,
+            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
+        {
+            var model = await req.Body<ReplacePlayerCardRequest>();
+            model.Response = this.cardService.ShuffleResponses(1).First();
+            return await context.Orchestrate(req, nameof(Game.ReplacePlayerCard), model, gameEvents);
+        }
+
+        [FunctionName(nameof(ResetResponseTrigger))]
+        public async Task<IActionResult> ResetResponseTrigger(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/respond/reset")] HttpRequest req,
+            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
+        {
+            var model = await req.Body<ResetResponseRequest>();
+            return await context.Orchestrate(req, nameof(Game.ResetResponse), model, gameEvents);
         }
 
         [FunctionName(nameof(RespondTrigger))]

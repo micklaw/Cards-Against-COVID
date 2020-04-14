@@ -1,16 +1,11 @@
-﻿using CardsAgainstHumanity.Application.Extensions;
-
-namespace CardsAgainstHumanity.UI.State.Games.Actions
+﻿namespace CardsAgainstHumanity.UI.State.Games.Actions
 {
-    public class GetOrCreateGameAction
+    public class GetOrCreateGameAction : BaseGameAction
     {
-        public string InstanceName { get; }
-
         public string GameName { get; }
 
-        public GetOrCreateGameAction(string gameName)
+        public GetOrCreateGameAction(string gameName) : base(gameName)
         {
-            this.InstanceName = gameName.Slugify();
             this.GameName = gameName;
         }
     }

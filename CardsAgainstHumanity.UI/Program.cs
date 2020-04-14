@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Text;
+using Blazored.LocalStorage;
 using CardsAgainstHumanity.UI.Clients;
 using Fluxor;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -22,11 +23,16 @@ namespace CardsAgainstHumanity.UI
             builder.Services.AddRefitClient<IApiClient>(settings)
                 .ConfigureHttpClient(c => c.BaseAddress = new Uri("http://localhost:7071/api"));
 
+            builder.Services.AddBlazoredLocalStorage();
+
             builder.Services.AddFluxor(options =>
             {
                 options.ScanAssemblies(typeof(Program).Assembly);
+
+#if DEBUG
                 options.UseRouting();
                 options.UseReduxDevTools();
+#endif
             });
 
             await builder.Build().RunAsync();

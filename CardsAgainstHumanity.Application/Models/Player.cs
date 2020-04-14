@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace CardsAgainstHumanity.Application.Models
 {
@@ -19,6 +20,23 @@ namespace CardsAgainstHumanity.Application.Models
         public void Shuffle(IList<string> responses)
         {
             Cards = responses;
+        }
+
+        public void Replace(int cardIndex, string response)
+        {
+            var card = Cards?.Select((item, index) => new
+                {
+                    Item = item,
+                    Index = index
+                })
+                .FirstOrDefault(i => i.Index == cardIndex)
+                ?.Item;
+
+            if (card != null)
+            {
+                Cards.Insert(cardIndex, response);
+                Cards.Remove(card);
+            }
         }
     }
 }

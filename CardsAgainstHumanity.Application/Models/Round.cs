@@ -7,6 +7,8 @@ namespace CardsAgainstHumanity.Application.Models
     {
         public string Prompt { get; set; }
 
+        public bool HasResponses => Responses != null && Responses.Any();
+
         public IList<Response> Responses { get; set; } = new List<Response>();
 
         public IList<int> Voted { get; set; } = new List<int>();
@@ -21,8 +23,7 @@ namespace CardsAgainstHumanity.Application.Models
         {
             if (Votes != null && Votes.Any())
             {
-                WonBy = Votes.GroupBy(i => i).Select(i => new {PlayerId = i.Key, Count = i.Count()}).OrderByDescending(i => i.Count).First().PlayerId;
-                return;
+                WonBy = Votes.GroupBy(i => i).Select(i => new {PlayerId = i.Key, Count = i.Count()}).OrderByDescending(i => i.Count)?.FirstOrDefault()?.PlayerId ?? 0;
             }
         }
 
@@ -38,6 +39,11 @@ namespace CardsAgainstHumanity.Application.Models
                 Responses = new List<Response>();
             }
 
+            if (voterId == id)
+            {
+                return;
+            }
+
             if (Responses.All(i => i.PlayerId != id))
             {
                 return;
@@ -50,6 +56,21 @@ namespace CardsAgainstHumanity.Application.Models
 
             Voted.Add(voterId);
             Votes.Add(id);
+        }
+
+        public void ResetResponse(int playerId)
+        {
+            if (Responses == null)
+            {
+                Responses = new List<Response>();
+            }
+
+            var response = Responses?.FirstOrDefault(i => i.PlayerId == playerId);
+
+            if (response != null)
+            {
+                Responses.Remove(response);
+            }
         }
 
         public void Respond(int responderId, List<int> responses)

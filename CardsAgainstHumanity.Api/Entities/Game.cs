@@ -5,6 +5,7 @@ using CardsAgainstHumanity.Api.Models;
 using CardsAgainstHumanity.Application.Extensions;
 using CardsAgainstHumanity.Application.Interfaces;
 using CardsAgainstHumanity.Application.Models;
+using CardsAgainstHumanity.Application.Models.Api;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
@@ -29,8 +30,6 @@ namespace CardsAgainstHumanity.Application.State
         public bool IsOpen { get; set; } = true;
 
         public bool IsOver { get; set; }
-
-        public Dictionary<string, int> Score => PreviousRounds?.GroupBy(i => i.WonBy).ToDictionary(i => Players?.First(p => p.Id == i.Key)?.Name ?? "Unknown", i => i.Count());
 
         public Game GetOrCreate(string name)
         {
@@ -131,9 +130,21 @@ namespace CardsAgainstHumanity.Application.State
             return this;
         }
 
+        public Game ReplacePlayerCard(ReplacePlayerCardRequest model)
+        {
+            Player player = Players.First(i => i.Id == model.PlayerId);
+            player.Replace(model.CardIndex, model.Response);
+            return this;
+        }
+
         public Game Respond(RespondModel model)
         {
             CurrentRound?.Respond(model.PlayerId, model.Responses);
+            return this;
+        }
+        public Game ResetResponse(ResetResponseRequest model)
+        {
+            CurrentRound?.ResetResponse(model.PlayerId);
             return this;
         }
 

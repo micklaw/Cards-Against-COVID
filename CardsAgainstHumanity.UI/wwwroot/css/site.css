@@ -144,7 +144,11 @@ app {
     display: inline-block;
 }
 
-.response-list {
-    width: 18rem;
-    display: inline-block;
-}
+    .card h5.card-title {
+        font-size: 1.75rem;
+    }
+
+    .response-list {
+        width: 18rem;
+        display: inline-block;
+    }

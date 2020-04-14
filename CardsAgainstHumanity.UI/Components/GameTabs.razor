@@ -7,6 +7,10 @@
         <nav class="nav nav-masthead justify-content-center">
             @foreach (var tab in Tabs)
             {
+                @if (!GameState.Value.PartOfCurrentGame && tab.Tab == Tab.Cards)
+                {
+                    continue;
+                }
                 <a class="nav-link @((tab.Active ? "active" : string.Empty))" @onclick="@(() => Toggle(tab))">@tab.Title</a>
             }
             <a class="nav-link" href="/">New</a>

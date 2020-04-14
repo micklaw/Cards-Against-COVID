@@ -1,4 +1,6 @@
-﻿using CardsAgainstHumanity.UI.State.Games;
+﻿using System.Collections.Generic;
+using System.Linq;
+using CardsAgainstHumanity.UI.State.Games;
 using CardsAgainstHumanity.UI.State.Games.Actions;
 using CardsAgainstHumanity.UI.State.Games.Models;
 using Fluxor;
@@ -8,7 +10,7 @@ namespace CardsAgainstHumanity.UI.State
     public class Reducers
     {
         [ReducerMethod]
-        public static GameState ReduceGameState(GameState state, UpdateGameStateAction action)
+        public static GameState ReduceGameState(GameState state, UpdateCurrentPlayersStateAction action)
         {
             var game = new Game()
             {
@@ -23,8 +25,28 @@ namespace CardsAgainstHumanity.UI.State
                 Url = action.Game.Url
             };
 
+            var voteTable = game.CurrentRound?.Votes
+                ?.GroupBy(i => i)
+                .OrderByDescending(i => (i?.Count() ?? 0))
+                .ToDictionary(i => i.Key, i => (i?.Count() ?? 0)) ?? new Dictionary<int, int>();
+
+            var roundCount = game?.PreviousRounds?.Count ?? 0;
+
+            if (game.CurrentRound != null)
+            {
+                roundCount++;
+            }
+
+            var responses = game?.CurrentRound?.Responses
+                ?.FirstOrDefault(i => action.CurrentPlayerId.HasValue && i.PlayerId == action.CurrentPlayerId)
+                ?.Responses ?? new List<int>();
+
             return new GameState()
             {
+                CurrentResponses = responses,
+                RoundCount = roundCount,
+                CurrentPlayer = game.Players?.FirstOrDefault(i => action.CurrentPlayerId.HasValue && i.Id == action.CurrentPlayerId),
+                VoteTable = voteTable,
                 Game = game
             };
         }

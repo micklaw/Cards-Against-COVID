@@ -41,7 +41,10 @@ namespace CardsAgainstHumanity.UI.Clients
         [Post("/game/{instance}/player/cards/shuffle")]
         Task<Game> ShuffleCards(string instance, [Body]ShufflePlayerCardsRequest request);
 
-        [Post("/game/{instance}")]
+        [Post("/game/{instance}/player/card/replace")]
+        Task<Game> ReplaceCard(string instance, [Body]ReplacePlayerCardRequest request);
+
+        [Post("/game/{instance}/round/vote")]
         Task<Game> Vote(string instance, [Body]RoundVoteRequest request);
     }
 }

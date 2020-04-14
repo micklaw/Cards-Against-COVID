@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using CardsAgainstHumanity.Application.Interfaces;
 using CardsAgainstHumanity.Application.Models;
 using CardsAgainstHumanity.UI.State.Games.Models;
 
@@ -17,24 +16,15 @@ namespace CardsAgainstHumanity.UI.State.Games
     {
         public Game Game { get; set; }
 
-        public Dictionary<int, int> VoteTable => Game?.CurrentRound?.Votes
-                                    ?.GroupBy(i => i)
-                                    ?.OrderByDescending(i => (i?.Count() ?? 0))
-                                    ?.ToDictionary(i => i.Key, i => (i?.Count() ?? 0)) ?? new Dictionary<int, int>();
+        public bool PartOfCurrentGame => CurrentPlayer != null;
 
-        public Player CurrentPlayer => Game?.Players?.FirstOrDefault();
+        public Dictionary<int, int> VoteTable { get; set; }
 
-        public int RoundCount()
-        {
-            var previousCount = Game.PreviousRounds?.Count ?? 0;
+        public Player CurrentPlayer { get; set; }
 
-            if (Game.CurrentRound != null)
-            {
-                previousCount++;
-            }
+        public int RoundCount { get; set; }
 
-            return previousCount;
-        }
+        public IList<int> CurrentResponses { get; set; }
 
         public string GetPlayerName(int playerId, bool useIsWon = false)
         {

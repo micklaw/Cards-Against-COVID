@@ -1,5 +1,6 @@
 ﻿@inherits FluxorComponent
 @inject IState<GameState> GameState
+@inject IDispatcher Dispatcher
 
 @if (GameState.Value.CurrentPlayer != null)
 {
@@ -7,17 +8,27 @@
 
     @if (GameState.Value.CurrentPlayer.Cards != null && GameState.Value.CurrentPlayer.Cards.Any())
     {
-
         <ul class="list-unstyled justify-content-center">
-            @foreach (var response in GameState.Value.CurrentPlayer.Cards)
+            @foreach (var response in GameState.Value.CurrentPlayer.Cards.Select((i, v) => new { Item = i, Index = v }))
             {
                 <li class="response-list">
-                    <Card Type="CardType.Response" Text="@response"></Card>
+                    <Card Type="CardType.Response" Text="@response.Item"></Card>
 
                     <form>
                         <div class="form-group">
-                            <button type="button" class="btn btn-sm btn-primary">Select</button>
-                            <button type="button" class="btn btn-sm btn-primary">Replace</button>
+                            @if (!GameState.Value.CurrentResponses.Contains(response.Index) && !SelectedResponses.Contains(response.Index))
+                            {
+                                <button type="button" class="btn btn-sm btn-primary" @onclick="(e) => Toggle(e, response.Index)">Select</button>
+                                <button type="button" class="btn btn-sm btn-primary" @onclick="(e) => Replace(e, response.Index)">Replace</button>
+                            }
+                            else if (SelectedResponses.Contains(response.Index))
+                            {
+                                <button type="button" class="btn btn-sm btn-warning" @onclick="(e) => Toggle(e, response.Index)">Remove</button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-sm btn-info" disabled="disabled">Played</button>
+                            }
                         </div>
                     </form>
                 </li>
@@ -25,25 +36,89 @@
         </ul>
     }
 
-    <p><i>These cards are pish, replace them all?</i></p>
-    <form>
-        <div class="form-group">
-            <button type="button" class="btn btn-primary">Replace all</button>
-        </div>
-    </form>
+    @if (!GameState.Value.CurrentResponses.Any() && !SelectedResponses.Any())
+    {
+        <p><i>These cards are pish, replace them all?</i></p>
+        <form>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" @onclick="ReplaceAll">Replace all</button>
+            </div>
+        </form>
+    }
+    else if (GameState.Value.CurrentResponses.Any() && !SelectedResponses.Any())
+    {
+        <form>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" @onclick="ResetResponse">Reset all</button>
+            </div>
+        </form>
+    }
+    else if (SelectedResponses.Any())
+    {
+        <form>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" @onclick="Vote">Vote</button>
+            </div>
+        </form>
+    }
 
 }
 else
 {
-    <p>No cards and no life, what a loser</p>
+    <p>You nosey bastard you!</p>
     <form>
         <div class="form-group">
-            <button type="button" class="btn btn-primary">Join Game</button>
+            <a href="/">Away and find some of your own mates</a>
         </div>
     </form>
 }
 
 @code
 {
+    private readonly List<int> SelectedResponses = new List<int>();
 
+    private void Toggle(MouseEventArgs obj, int count)
+    {
+        if (SelectedResponses.Contains(count))
+        {
+            SelectedResponses.Remove(count);
+        }
+        else
+        {
+            SelectedResponses.Add(count);
+        }
+    }
+
+    private void Replace(MouseEventArgs mouseEventArgs, int count)
+    {
+        Dispatcher.Dispatch(new ReplacePlayerCardAction(
+            GameState.Value.Game.Url,
+            GameState.Value.CurrentPlayer.Id,
+            count));
+    }
+
+    private void ReplaceAll(MouseEventArgs mouseEventArgs)
+    {
+        Dispatcher.Dispatch(new PlayerShuffleCardsAction(
+            GameState.Value.Game.Url,
+            GameState.Value.CurrentPlayer.Id));
+    }
+
+    private void Vote(MouseEventArgs obj)
+    {
+        Dispatcher.Dispatch(new RoundRespondAction(
+            GameState.Value.Game.Url,
+            GameState.Value.CurrentPlayer.Id,
+            SelectedResponses));
+
+        SelectedResponses.Clear();
+    }
+
+    private void ResetResponse(MouseEventArgs obj)
+    {
+        Dispatcher.Dispatch(new RoundRespondAction(
+            GameState.Value.Game.Url,
+            GameState.Value.CurrentPlayer.Id,
+            SelectedResponses));
+    }
 }
