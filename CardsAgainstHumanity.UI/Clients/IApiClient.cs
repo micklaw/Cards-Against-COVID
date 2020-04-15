@@ -46,5 +46,11 @@ namespace CardsAgainstHumanity.UI.Clients
 
         [Post("/game/{instance}/round/vote")]
         Task<Game> Vote(string instance, [Body]RoundVoteRequest request);
+
+        [Put("/game/{instance}/join")]
+        Task Join(string instance, [Body]GroupGameRequest request);
+
+        [Put("/game/{instance}/leave")]
+        Task Leave(string instance, [Body]GroupGameRequest request);
     }
 }

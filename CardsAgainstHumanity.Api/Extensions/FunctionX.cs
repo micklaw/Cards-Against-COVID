@@ -32,6 +32,11 @@ namespace CardsAgainstHumanity.Api.Extensions
             return response[property].Value<T>();
         }
 
+        public static string RouteParam(this HttpRequest req, string property)
+        {
+            return req.RouteValues[property].ToString();
+        }
+
         public static async Task<IActionResult> Orchestrate(this IDurableOrchestrationClient context, HttpRequest req, string orchestration, IAsyncCollector<IGame> gameEvents)
         {
             var name = req.RouteValues["instance"].ToString();

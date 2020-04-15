@@ -1,0 +1,28 @@
+parameters:
+  - name: serviceConnection
+    type: string
+
+steps:
+- task: ExtractFiles@1
+  displayName: 'Extract files for Api'
+  inputs:
+    archiveFilePatterns: '$(Agent.BuildDirectory)/drop/CardsAgainstHumanity.Api.zip'
+    destinationFolder: '$(Agent.BuildDirectory)/CAH/extract'
+    cleanDestinationFolder: true 
+
+- task: ArchiveFiles@2
+  displayName: 'Archive $(Agent.BuildDirectory)/CAH/extract'
+  inputs:
+    rootFolderOrFile: '$(Agent.BuildDirectory)/CAH/extract'
+    includeRootFolder: false
+    archiveFile: '$(Build.ArtifactStagingDirectory)/CardsAgainstHumanity.Api.$(Build.BuildId).zip'
+    verbose: true
+
+- task: AzureFunctionApp@1
+  displayName: 'Azure Function Api deploy'
+  inputs:
+    azureSubscription: ${{ parameters.serviceConnection }}
+    appType: functionApp
+    appName: $(Devops:Pipeline:FunctionName)
+    package: '$(Build.ArtifactStagingDirectory)/CardsAgainstHumanity.Api.$(Build.BuildId).zip'
+    appSettings: '-APPINSIGHTS_INSTRUMENTATIONKEY $(Devops:Pipeline:AppInsightsKey) -APPLICATIONINSIGHTS_CONNECTION_STRING InstrumentationKey=$(Devops:Pipeline:AppInsightsKey) -AzureWebJobsStorage $(Devops:Pipeline:StorageConnection) -AzureWebJobsDashboard $(Devops:Pipeline:StorageConnection) -MyTaskHub CAHHub -AzureSignalRConnectionString $(Devops:Pipeline:SignalrConnection)'

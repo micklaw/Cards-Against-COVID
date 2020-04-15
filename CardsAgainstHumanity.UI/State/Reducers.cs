@@ -59,5 +59,17 @@ namespace CardsAgainstHumanity.UI.State
                 Game = game
             };
         }
+
+        [ReducerMethod]
+        public static ConnectionState ReduceConnectionState(ConnectionState state, ConnectToGameGroupCompleteAction action)
+        {
+            return new ConnectionState()
+            {
+                Instance = action.InstanceName,
+                ConnectionId = action.ConnectionId,
+                Connected = action.Connected,
+                UserId = action.UserId
+            };
+        }
     }
 }

@@ -2,8 +2,11 @@
 {
     public class ConnectToGameGroupAction : BaseGameAction
     {
-        public ConnectToGameGroupAction(string gameName) : base(gameName)
+        public string ConnectionId { get; }
+
+        public ConnectToGameGroupAction(string gameName, string connectionId) : base(gameName)
         {
+            ConnectionId = connectionId;
         }
     }
 }

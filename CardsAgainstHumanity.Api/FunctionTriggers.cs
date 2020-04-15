@@ -19,7 +19,7 @@ namespace CardsAgainstHumanity.Api
 {
     public class FunctionTriggers : FunctionBase
     {
-        private const string RoutePrefix = "game/{instance}";
+        public const string RoutePrefix = "game/{instance}";
         private readonly ICardService cardService;
 
         public FunctionTriggers(ICardService cardService)

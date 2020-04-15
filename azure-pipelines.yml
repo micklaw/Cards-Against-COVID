@@ -1,8 +1,3 @@
-# ASP.NET Core (.NET Framework)
-# Build and test ASP.NET Core projects targeting the full .NET Framework.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
-
 trigger:
   branches:
     include:
@@ -21,33 +16,33 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  buildConfiguration: 'Release'
-  solution: '**/*.sln'
+  GitVersion.SemVer: ''
 
-steps:
-    
-- task: Bash@3
-  displayName: 'List Environment Variables'
-  inputs:
-    targetType: 'inline'
-    script: 'env | sort'
-
-- task: UseDotNet@2
-  displayName: 'Install .NET Core SDK'
-  inputs:
-    version: 3.1.x
-    performMultiLevelLookup: true
-
-- task: DotNetCoreCLI@2
-  displayName: 'Restore'
-  inputs:
-    command: restore
-    projects: '**/*.csproj'
-
-- task: DotNetCoreCLI@2
+- stage: 'Build'
   displayName: 'Build'
-  inputs:
-    command: build
-    projects: '**/*.csproj'
-    arguments: '--configuration $(buildConfiguration)'
+  jobs:
+  - job: 'Build'
+    displayName: 'Build & Publish Artifacts'
+    variables:
+    - group: 'Common'
+    steps:
+    - template: Build/build.yml
 
+- stage: 'Relese' 
+  displayName: 'Release to Live'
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  dependsOn: ['Build']
+  jobs:
+  - deployment: 'Appplication'
+    displayName: 'Api & UI deployment'
+    environment: 'Live'
+    variables:
+    - group: 'Common'
+    - group: 'Live'
+    strategy: 
+      runOnce:
+        deploy:               
+          steps:
+          - template: Build/release.yml
+            parameters:
+              serviceConnection: 'CAH-Connection'

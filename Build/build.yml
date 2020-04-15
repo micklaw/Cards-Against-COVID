@@ -1,0 +1,48 @@
+steps:
+- task: UseGitVersion@5
+  displayName: gitversion
+  inputs:
+    versionSpec: '5.x'
+    updateAssemblyInfo: true
+
+- task: Bash@3
+  displayName: 'List Environment Variables'
+  inputs:
+    targetType: 'inline'
+    script: 'env | sort'
+
+- task: UseDotNet@2
+  displayName: 'Install .NET Core SDK'
+  inputs:
+    version: 3.1.x
+    performMultiLevelLookup: true
+
+- task: DotNetCoreCLI@2
+  displayName: 'Restore'
+  inputs:
+    command: restore
+    projects: '**/*.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build'
+  inputs:
+    command: build
+    projects: '**/*.csproj'
+    arguments: '--configuration $(Devops:Pipeline:Configuration)'
+
+- task: DotNetCoreCLI@2
+  displayName: Publish
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: |
+     **/CardsAgainstHumanity.Api.csproj
+     **/CardsAgainstHumanity.UI.csproj
+    arguments: '--configuration $(Devops:Pipeline:Configuration) --output $(build.artifactstagingdirectory)'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'

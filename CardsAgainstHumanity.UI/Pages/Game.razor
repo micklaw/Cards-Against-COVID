@@ -49,6 +49,8 @@ else
         });
 
         await hubConnection.StartAsync();
+
+        Dispatcher.Dispatch(new ConnectToGameGroupAction(Instance, hubConnection.ConnectionId));
     }
 }
  
