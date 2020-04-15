@@ -3,7 +3,7 @@ steps:
   displayName: gitversion
   inputs:
     versionSpec: '5.x'
-    updateAssemblyInfo: true
+    updateAssemblyInfo: false
 
 - task: Bash@3
   displayName: 'List Environment Variables'
