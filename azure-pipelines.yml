@@ -18,6 +18,7 @@ pool:
 variables:
   GitVersion.SemVer: ''
 
+stages
 - stage: 'Build'
   displayName: 'Build'
   jobs:
