@@ -3,17 +3,23 @@ parameters:
     type: string
 
 steps:
+- task: Bash@3
+  displayName: 'List Environment Variables'
+  inputs:
+    targetType: 'inline'
+    script: 'env | sort'
+
 - task: ExtractFiles@1
   displayName: 'Extract files for Api'
   inputs:
-    archiveFilePatterns: '$(Agent.BuildDirectory)/drop/CardsAgainstHumanity.Api.zip'
-    destinationFolder: '$(Agent.BuildDirectory)/CAH/extract'
+    archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/drop/CardsAgainstHumanity.Api.zip'
+    destinationFolder: '$(Build.ArtifactStagingDirectory)/CAH/extract'
     cleanDestinationFolder: true 
 
 - task: ArchiveFiles@2
-  displayName: 'Archive $(Agent.BuildDirectory)/CAH/extract'
+  displayName: 'Archive $(Build.ArtifactStagingDirectory)/CAH/extract'
   inputs:
-    rootFolderOrFile: '$(Agent.BuildDirectory)/CAH/extract'
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/CAH/extract'
     includeRootFolder: false
     archiveFile: '$(Build.ArtifactStagingDirectory)/CardsAgainstHumanity.Api.$(Build.BuildId).zip'
     verbose: true
