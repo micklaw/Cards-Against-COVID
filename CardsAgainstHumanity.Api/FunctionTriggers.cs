@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using CardsAgainstHumanity.Api.Extensions;
 using CardsAgainstHumanity.Api.Models;
@@ -12,8 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-using Microsoft.Azure.WebJobs.Extensions.SignalRService;
-using Newtonsoft.Json;
 
 namespace CardsAgainstHumanity.Api
 {
@@ -30,7 +27,7 @@ namespace CardsAgainstHumanity.Api
         [FunctionName(nameof(GetOrCreateTrigger))]
         public async Task<IActionResult> GetOrCreateTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix)] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
         {
             var model = await req.BodyParam<string>("name");
@@ -40,35 +37,35 @@ namespace CardsAgainstHumanity.Api
         [FunctionName(nameof(OpenTrigger))]
         public Task<IActionResult> OpenTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/open")] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
             => context.Orchestrate(req, nameof(Game.Open), gameEvents);
 
         [FunctionName(nameof(CloseTrigger))]
         public Task<IActionResult> CloseTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/close")] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
             => context.Orchestrate(req, nameof(Game.Close), gameEvents);
 
         [FunctionName(nameof(FinishTrigger))]
         public Task<IActionResult> FinishTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/finish")] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
             => context.Orchestrate(req, nameof(Game.Finish), gameEvents);
 
         [FunctionName(nameof(RevealTrigger))]
         public Task<IActionResult> RevealTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/reveal")] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
             => context.Orchestrate(req, nameof(Game.RevealRound), gameEvents);
         
         [FunctionName(nameof(AddPlayerTrigger))]
         public async Task<IActionResult> AddPlayerTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/add")] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
         {
             var model = await req.Body<AddPlayerModel>();
@@ -79,21 +76,21 @@ namespace CardsAgainstHumanity.Api
         [FunctionName(nameof(NextRoundTrigger))]
         public async Task<IActionResult> NextRoundTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/next")] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
             => await context.Orchestrate(req, nameof(Game.NextRound), this.cardService.GetPrompt(), gameEvents);
 
         [FunctionName(nameof(NewRoundTrigger))]
         public async Task<IActionResult> NewRoundTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/new")] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
             => await context.Orchestrate(req, nameof(Game.NewRound), this.cardService.GetPrompt(), gameEvents);
 
         [FunctionName(nameof(VoteTrigger))]
         public async Task<IActionResult> VoteTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/vote")] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
         {
             var model = await req.Body<VoteModel>();
@@ -103,14 +100,14 @@ namespace CardsAgainstHumanity.Api
         [FunctionName(nameof(NewPromptTrigger))]
         public async Task<IActionResult> NewPromptTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/prompt/new")] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
             => await context.Orchestrate(req, nameof(Game.NewPrompt), this.cardService.GetPrompt(), gameEvents);
 
         [FunctionName(nameof(ShufflePlayerCardsTrigger))]
         public async Task<IActionResult> ShufflePlayerCardsTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/cards/shuffle")] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
         {
             var model = await req.Body<ShufflePlayerCardsModel>();
@@ -121,7 +118,7 @@ namespace CardsAgainstHumanity.Api
         [FunctionName(nameof(ReplacePlayerCardTrigger))]
         public async Task<IActionResult> ReplacePlayerCardTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/card/replace")] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
         {
             var model = await req.Body<ReplacePlayerCardRequest>();
@@ -132,7 +129,7 @@ namespace CardsAgainstHumanity.Api
         [FunctionName(nameof(ResetResponseTrigger))]
         public async Task<IActionResult> ResetResponseTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/respond/reset")] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
         {
             var model = await req.Body<ResetResponseRequest>();
@@ -142,7 +139,7 @@ namespace CardsAgainstHumanity.Api
         [FunctionName(nameof(RespondTrigger))]
         public async Task<IActionResult> RespondTrigger(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/respond")] HttpRequest req,
-            [DurableClient(TaskHub = "%MyTaskHub%")] IDurableOrchestrationClient context,
+            [DurableClient] IDurableOrchestrationClient context,
             [Queue("game-amended")] IAsyncCollector<IGame> gameEvents)
         {
             var model = await req.Body<RespondModel>();

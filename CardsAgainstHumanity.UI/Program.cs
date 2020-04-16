@@ -21,7 +21,7 @@ namespace CardsAgainstHumanity.UI
             var settings = new RefitSettings();
 
             builder.Services.AddRefitClient<IApiClient>(settings)
-                .ConfigureHttpClient(c => c.BaseAddress = new Uri("http://localhost:7071/api"));
+                .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://funcardshumanity.azurewebsites.net/api"));
 
             builder.Services.AddBlazoredLocalStorage();
 

@@ -10,7 +10,6 @@
   },
   "extensions": {
     "durableTask": {
-      "hubName": "%MyTaskHub%"
     }
   }
 }

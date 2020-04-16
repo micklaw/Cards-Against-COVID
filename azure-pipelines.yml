@@ -30,6 +30,9 @@ stages:
       inputs:
         versionSpec: '5.x'
         updateAssemblyInfo: false
+    - powershell: |
+        Write-Host "##vso[task.setvariable variable=ProjectBuildNumber;]$(GitVersion.SemVer)"
+        Write-Host "##vso[build.updatebuildnumber]$(GitVersion.SemVer)"
 
 - stage: 'Build'
   displayName: 'Build'

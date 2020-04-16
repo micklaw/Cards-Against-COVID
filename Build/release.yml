@@ -37,4 +37,4 @@ steps:
     appType: functionApp
     appName: $(Devops:Pipeline:FunctionName)
     package: '$(Build.ArtifactStagingDirectory)/CardsAgainstHumanity.Api.$(Build.BuildId).zip'
-    appSettings: '-APPINSIGHTS_INSTRUMENTATIONKEY $(Devops:Pipeline:AppInsightsKey) -APPLICATIONINSIGHTS_CONNECTION_STRING InstrumentationKey=$(Devops:Pipeline:AppInsightsKey) -AzureWebJobsStorage $(Devops:Pipeline:StorageConnection) -AzureWebJobsDashboard $(Devops:Pipeline:StorageConnection) -MyTaskHub CAHHub -AzureSignalRConnectionString $(Devops:Pipeline:SignalrConnection)'
+    appSettings: '-APPINSIGHTS_INSTRUMENTATIONKEY $(Devops:Pipeline:AppInsightsKey) -APPLICATIONINSIGHTS_CONNECTION_STRING InstrumentationKey=$(Devops:Pipeline:AppInsightsKey) -AzureWebJobsStorage $(Devops:Pipeline:StorageConnection) -AzureWebJobsDashboard $(Devops:Pipeline:StorageConnection) -AzureSignalRConnectionString $(Devops:Pipeline:SignalrConnection)'
