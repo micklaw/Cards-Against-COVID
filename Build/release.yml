@@ -9,6 +9,12 @@ steps:
     targetType: 'inline'
     script: 'env | sort'
 
+- task: DownloadPipelineArtifact@2
+  displayName: 'Get artifacts'
+  inputs:
+    artifact: 'drop'
+    path: '$(Build.ArtifactStagingDirectory)/drop'
+
 - task: ExtractFiles@1
   displayName: 'Extract files for Api'
   inputs:
@@ -17,7 +23,7 @@ steps:
     cleanDestinationFolder: true 
 
 - task: ArchiveFiles@2
-  displayName: 'Archive $(Build.ArtifactStagingDirectory)/CAH/extract'
+  displayName: 'Archive for push'
   inputs:
     rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/CAH/extract'
     includeRootFolder: false

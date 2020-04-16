@@ -35,8 +35,9 @@ steps:
      **/CardsAgainstHumanity.UI.csproj
     arguments: '--configuration $(Devops:Pipeline:Configuration) --output $(build.artifactstagingdirectory)'
 
-- task: PublishBuildArtifacts@1
+- task: PublishPipelineArtifact@0
   displayName: 'Publish Artifact'
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   inputs:
-    PathtoPublish: '$(build.artifactstagingdirectory)'
+    targetPath: '$(build.artifactstagingdirectory)'
+    artifactName: 'drop'
