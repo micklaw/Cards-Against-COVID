@@ -1,10 +1,4 @@
 steps:
-- task: UseGitVersion@5
-  displayName: gitversion
-  inputs:
-    versionSpec: '5.x'
-    updateAssemblyInfo: false
-
 - task: Bash@3
   displayName: 'List Environment Variables'
   inputs:
