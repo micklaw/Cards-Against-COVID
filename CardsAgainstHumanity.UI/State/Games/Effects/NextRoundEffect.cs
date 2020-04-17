@@ -5,23 +5,19 @@ using Fluxor;
 
 namespace CardsAgainstHumanity.UI.State.Games.Effects
 {
-    public class NextRoundEffect : Effect<NextRoundAction>
+    public class NextRoundEffect : CommonUpdateGameEffect<NextRoundAction>
     {
         private readonly IApiClient apiClient;
 
-        public NextRoundEffect(IApiClient apiClient)
+        public NextRoundEffect(IApiClient apiClient) : base(apiClient)
         {
             this.apiClient = apiClient;
         }
 
         protected override async Task HandleAsync(NextRoundAction action, IDispatcher dispatcher)
         {
-            var game = await this.apiClient.NextRound(action.InstanceName);
-
-            if (game != null)
-            {
-                dispatcher.Dispatch(new UpdateGameStateAction(game));
-            }
+            await this.apiClient.NextRound(action.InstanceName);
+            await this.TryUpdateGame(action, dispatcher);
         }
     }
 }

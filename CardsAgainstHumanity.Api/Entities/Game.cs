@@ -31,7 +31,7 @@ namespace CardsAgainstHumanity.Application.State
 
         public bool IsOver { get; set; }
 
-        public Game GetOrCreate(string name)
+        public Game Create(string name)
         {
             if (string.IsNullOrWhiteSpace(Url))
             {

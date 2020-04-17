@@ -6,26 +6,22 @@ using Fluxor;
 
 namespace CardsAgainstHumanity.UI.State.Games.Effects
 {
-    public class PlayerShuffleCardsEffect : Effect<PlayerShuffleCardsAction>
+    public class PlayerShuffleCardsEffect : CommonUpdateGameEffect<PlayerShuffleCardsAction>
     {
         private readonly IApiClient apiClient;
 
-        public PlayerShuffleCardsEffect(IApiClient apiClient)
+        public PlayerShuffleCardsEffect(IApiClient apiClient) : base(apiClient)
         {
             this.apiClient = apiClient;
         }
 
         protected override async Task HandleAsync(PlayerShuffleCardsAction action, IDispatcher dispatcher)
         {
-            var game = await this.apiClient.ShuffleCards(action.InstanceName, new ShufflePlayerCardsRequest()
+            await this.apiClient.ShuffleCards(action.InstanceName, new ShufflePlayerCardsRequest()
             {
                 PlayerId = action.PlayerId
             });
-
-            if (game != null)
-            {
-                dispatcher.Dispatch(new UpdateGameStateAction(game));
-            }
+            await this.TryUpdateGame(action, dispatcher);
         }
     }
 }

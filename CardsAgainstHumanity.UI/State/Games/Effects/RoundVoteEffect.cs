@@ -6,27 +6,23 @@ using Fluxor;
 
 namespace CardsAgainstHumanity.UI.State.Games.Effects
 {
-    public class RoundVoteEffect : Effect<RoundVoteAction>
+    public class RoundVoteEffect : CommonUpdateGameEffect<RoundVoteAction>
     {
         private readonly IApiClient apiClient;
 
-        public RoundVoteEffect(IApiClient apiClient)
+        public RoundVoteEffect(IApiClient apiClient) : base(apiClient)
         {
             this.apiClient = apiClient;
         }
 
         protected override async Task HandleAsync(RoundVoteAction action, IDispatcher dispatcher)
         {
-            var game = await this.apiClient.Vote(action.InstanceName, new RoundVoteRequest()
+            await this.apiClient.Vote(action.InstanceName, new RoundVoteRequest()
             {
                 PlayerId = action.PlayerId,
                 VoteeId = action.VoteeId
             });
-
-            if (game != null)
-            {
-                dispatcher.Dispatch(new UpdateGameStateAction(game));
-            }
+            await this.TryUpdateGame(action, dispatcher);
         }
     }
 }

@@ -8,44 +8,47 @@ namespace CardsAgainstHumanity.UI.Clients
 {
     public interface IApiClient
     {
+        [Get("/game/{instance}/read")]
+        Task<Game> Read(string instance);
+
         [Post("/game/{instance}")]
-        Task<Game> GetOrCreate(string instance, [Body]GetOrCreateRequest request);
+        Task GetOrCreate(string instance, [Body]CreateRequest request);
 
         [Post("/game/{instance}/open")]
-        Task<Game> Open(string instance);
+        Task Open(string instance);
 
         [Post("/game/{instance}/close")]
-        Task<Game> Close(string instance);
+        Task Close(string instance);
 
         [Post("/game/{instance}/finish")]
-        Task<Game> Finish(string instance);
+        Task Finish(string instance);
 
         [Post("/game/{instance}/round/new")]
-        Task<Game> NewRound(string instance);
+        Task NewRound(string instance);
 
         [Post("/game/{instance}/round/next")]
-        Task<Game> NextRound(string instance);
+        Task NextRound(string instance);
 
         [Post("/game/{instance}/round/prompt/new")]
-        Task<Game> NewPrompt(string instance);
+        Task NewPrompt(string instance);
 
         [Post("/game/{instance}/round/respond")]
-        Task<Game> Respond(string instance, [Body]RoundResponseRequest request);
+        Task Respond(string instance, [Body]RoundResponseRequest request);
 
         [Post("/game/{instance}/round/reveal")]
-        Task<Game> Reveal(string instance);
+        Task Reveal(string instance);
 
         [Post("/game/{instance}/player/add")]
-        Task<Game> AddPlayer(string instance, [Body]AddPlayerRequest request);
+        Task AddPlayer(string instance, [Body]AddPlayerRequest request);
 
         [Post("/game/{instance}/player/cards/shuffle")]
-        Task<Game> ShuffleCards(string instance, [Body]ShufflePlayerCardsRequest request);
+        Task ShuffleCards(string instance, [Body]ShufflePlayerCardsRequest request);
 
         [Post("/game/{instance}/player/card/replace")]
-        Task<Game> ReplaceCard(string instance, [Body]ReplacePlayerCardRequest request);
+        Task ReplaceCard(string instance, [Body]ReplacePlayerCardRequest request);
 
         [Post("/game/{instance}/round/vote")]
-        Task<Game> Vote(string instance, [Body]RoundVoteRequest request);
+        Task Vote(string instance, [Body]RoundVoteRequest request);
 
         [Put("/game/{instance}/join")]
         Task Join(string instance, [Body]GroupGameRequest request);

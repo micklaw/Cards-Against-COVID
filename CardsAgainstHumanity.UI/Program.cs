@@ -6,6 +6,7 @@ using Blazored.LocalStorage;
 using CardsAgainstHumanity.UI.Clients;
 using Fluxor;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
 
@@ -19,9 +20,15 @@ namespace CardsAgainstHumanity.UI
             builder.RootComponents.Add<App>("app");
 
             var settings = new RefitSettings();
-
+            
             builder.Services.AddRefitClient<IApiClient>(settings)
-                .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://funcardshumanity.azurewebsites.net/api"));
+                .ConfigureHttpClient((provider, client) =>
+                {
+                    var config = provider.GetService<IConfiguration>();
+
+                    client.BaseAddress = new Uri(config["apiUri"]);
+                    client.Timeout = TimeSpan.FromSeconds(10);
+                });
 
             builder.Services.AddBlazoredLocalStorage();
 

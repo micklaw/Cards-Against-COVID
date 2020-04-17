@@ -6,23 +6,19 @@ using Fluxor;
 
 namespace CardsAgainstHumanity.UI.State.Games.Effects
 {
-    public class RoundRevealEffect : Effect<RoundRevealAction>
+    public class RoundRevealEffect : CommonUpdateGameEffect<RoundRevealAction>
     {
         private readonly IApiClient apiClient;
 
-        public RoundRevealEffect(IApiClient apiClient)
+        public RoundRevealEffect(IApiClient apiClient) : base(apiClient)
         {
             this.apiClient = apiClient;
         }
 
         protected override async Task HandleAsync(RoundRevealAction action, IDispatcher dispatcher)
         {
-            var game = await this.apiClient.Reveal(action.InstanceName);
-
-            if (game != null)
-            {
-                dispatcher.Dispatch(new UpdateGameStateAction(game));
-            }
+            await this.apiClient.Reveal(action.InstanceName);
+            await this.TryUpdateGame(action, dispatcher);
         }
     }
 }

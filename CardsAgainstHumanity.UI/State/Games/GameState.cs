@@ -14,6 +14,8 @@ namespace CardsAgainstHumanity.UI.State.Games
 
     public class GameState
     {
+        public bool Fetching { get; set; }
+
         public Game Game { get; set; }
 
         public bool PartOfCurrentGame => CurrentPlayer != null;

@@ -20,22 +20,6 @@ namespace CardsAgainstHumanity.Api
             return connectionInfo;
         }
 
-        [FunctionName(nameof(GameUpdated))]
-        public static async Task GameUpdated(
-            [QueueTrigger("game-amended")] Game game,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var gameData = JsonConvert.SerializeObject(game);
-
-            await signalRMessages.AddAsync(
-                new SignalRMessage
-                {
-                    Target = "gameUpdated",
-                    GroupName = game.Url,
-                    Arguments = new [] { gameData }
-                });
-        }
-
         [FunctionName(nameof(JoinGroup))]
         public static async Task JoinGroup(
             [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = FunctionTriggers.RoutePrefix + "/join")] HttpRequest req,

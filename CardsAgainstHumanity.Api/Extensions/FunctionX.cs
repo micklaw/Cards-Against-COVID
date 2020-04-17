@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Text;
+﻿using System.IO;
 using System.Threading.Tasks;
-using CardsAgainstHumanity.Application.Extensions;
-using CardsAgainstHumanity.Application.Interfaces;
 using CardsAgainstHumanity.Application.State;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Azure.WebJobs.Extensions.SignalRService;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -37,57 +32,37 @@ namespace CardsAgainstHumanity.Api.Extensions
             return req.RouteValues[property].ToString();
         }
 
-        public static async Task<IActionResult> Orchestrate(this IDurableOrchestrationClient context, HttpRequest req, string orchestration, IAsyncCollector<IGame> gameEvents)
+        public static async Task<IActionResult> Orchestrate(this IDurableEntityClient context, HttpRequest req, string operationName, IAsyncCollector<SignalRMessage> signalRMessages)
         {
             var name = req.RouteValues["instance"].ToString();
-            var slug = name.Slugify();
-            var instanceId = await context.StartNewAsync(orchestration, slug);
-            var result = await context.WaitForCompletionOrCreateCheckStatusResponseAsync(req, instanceId);
-            return await TrySignalGroupUpdated(result, gameEvents);
+            var entityId = new EntityId(nameof(Game), name);
+
+            await context.SignalEntityAsync(entityId, operationName);
+            await TrySignalGroupUpdated(name, signalRMessages);
+
+            return new AcceptedResult();
         }
 
-        public static async Task<IActionResult> Orchestrate<TModel>(this IDurableOrchestrationClient context, HttpRequest req, string orchestration, TModel model, IAsyncCollector<IGame> gameEvents)
+        public static async Task<IActionResult> Orchestrate<TModel>(this IDurableEntityClient context, HttpRequest req, string operationName, TModel model, IAsyncCollector<SignalRMessage> signalRMessages)
         {
             var name = req.RouteValues["instance"].ToString();
-            var slug = name.Slugify();
-            var instanceId = await context.StartNewAsync(orchestration, slug, model);
-            var result = await context.WaitForCompletionOrCreateCheckStatusResponseAsync(req, instanceId);
-            return await TrySignalGroupUpdated(result, gameEvents);
+            var entityId = new EntityId(nameof(Game), name);
+
+            await context.SignalEntityAsync(entityId, operationName, model);
+            await TrySignalGroupUpdated(name, signalRMessages);
+
+            return new AcceptedResult();
         }
 
-        public static async Task<TResponse> Operate<TModel, TResponse>(this IDurableOrchestrationContext context, string operation)
+        private static Task TrySignalGroupUpdated(string gameUrl, IAsyncCollector<SignalRMessage> signalRMessages)
         {
-            var model = context.GetInput<TModel>();
-            var entityId = new EntityId(nameof(Game), context.InstanceId);
-            var response = await context.CallEntityAsync<TResponse>(entityId, operation, model);
-            return response;
-        }
-
-        public static async Task<TResponse> SignalOperate<TModel, TResponse>(this IDurableOrchestrationContext context, string operation)
-        {
-            var model = context.GetInput<TModel>();
-            var entityId = new EntityId(nameof(Game), context.InstanceId);
-            var response = await context.CallEntityAsync<TResponse>(entityId, operation, model);
-            return response;
-        }
-
-        public static async Task<TResponse> Operate<TResponse>(this IDurableOrchestrationContext context, string operation)
-        {
-            var entityId = new EntityId(nameof(Game), context.InstanceId);
-            var response = await context.CallEntityAsync<TResponse>(entityId, operation);
-            return response;
-        }
-
-        private static async Task<IActionResult> TrySignalGroupUpdated(IActionResult result, IAsyncCollector<IGame> gameEvents)
-        {
-            if (result is ObjectResult objectResult)
-            {
-                var response = (HttpResponseMessage)objectResult.Value;
-                var game = await response.Content.ReadAsAsync<Game>();
-                await gameEvents.AddAsync(game);
-            }
-
-            return result;
+            return signalRMessages.AddAsync(
+                new SignalRMessage
+                {
+                    Target = "gameUpdated",
+                    GroupName = gameUrl,
+                    Arguments = new[] { gameUrl }
+                });
         }
     }
 }

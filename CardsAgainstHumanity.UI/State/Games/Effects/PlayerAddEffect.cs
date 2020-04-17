@@ -10,12 +10,12 @@ using Fluxor;
 
 namespace CardsAgainstHumanity.UI.State.Games.Effects
 {
-    public class PlayerAddEffect : Effect<PlayerAddAction>
+    public class PlayerAddEffect : CommonUpdateGameEffect<PlayerAddAction>
     {
         private readonly IApiClient apiClient;
         private readonly ILocalStorageService localStorage;
 
-        public PlayerAddEffect(IApiClient apiClient, ILocalStorageService localStorage)
+        public PlayerAddEffect(IApiClient apiClient, ILocalStorageService localStorage) : base(apiClient)
         {
             this.apiClient = apiClient;
             this.localStorage = localStorage;
@@ -23,10 +23,11 @@ namespace CardsAgainstHumanity.UI.State.Games.Effects
 
         protected override async Task HandleAsync(PlayerAddAction action, IDispatcher dispatcher)
         {
-            var game = await this.apiClient.AddPlayer(action.InstanceName, new AddPlayerRequest()
+            await this.apiClient.AddPlayer(action.InstanceName, new AddPlayerRequest()
             {
                 PlayerName = action.PlayerName
             });
+            var game = await this.TryUpdateGame(action, dispatcher);
 
             var player = game?.Players.FirstOrDefault(i => i.Name == action.PlayerName);
 
@@ -35,10 +36,7 @@ namespace CardsAgainstHumanity.UI.State.Games.Effects
                 await this.localStorage.SetItemAsync(game.Url, player.Id);
             }
 
-            if (game != null)
-            {
-                dispatcher.Dispatch(new UpdateGameStateAction(game));
-            }
+            await this.TryUpdateGame(action, dispatcher);
         }
     }
 }

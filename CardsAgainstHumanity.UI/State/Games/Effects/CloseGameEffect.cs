@@ -5,23 +5,19 @@ using Fluxor;
 
 namespace CardsAgainstHumanity.UI.State.Games.Effects
 {
-    public class CloseGameEffect : Effect<CloseGameAction>
+    public class CloseGameEffect : CommonUpdateGameEffect<CloseGameAction>
     {
         private readonly IApiClient apiClient;
 
-        public CloseGameEffect(IApiClient apiClient)
+        public CloseGameEffect(IApiClient apiClient) : base(apiClient)
         {
             this.apiClient = apiClient;
         }
 
         protected override async Task HandleAsync(CloseGameAction action, IDispatcher dispatcher)
         {
-            var game = await this.apiClient.Close(action.InstanceName);
-
-            if (game != null)
-            {
-                dispatcher.Dispatch(new UpdateGameStateAction(game));
-            }
+            await this.apiClient.Close(action.InstanceName);
+            await this.TryUpdateGame(action, dispatcher);
         }
     }
 }

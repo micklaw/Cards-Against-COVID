@@ -2,6 +2,7 @@
 using System.Linq;
 using CardsAgainstHumanity.UI.State.Games;
 using CardsAgainstHumanity.UI.State.Games.Actions;
+using CardsAgainstHumanity.UI.State.Games.Effects;
 using CardsAgainstHumanity.UI.State.Games.Models;
 using Fluxor;
 
@@ -56,7 +57,8 @@ namespace CardsAgainstHumanity.UI.State
                 RoundCount = roundCount,
                 CurrentPlayer = game.Players?.FirstOrDefault(i => action.CurrentPlayerId.HasValue && i.Id == action.CurrentPlayerId),
                 VoteTable = voteTable,
-                Game = game
+                Game = game,
+                Fetching = state.Fetching
             };
         }
 
@@ -71,5 +73,23 @@ namespace CardsAgainstHumanity.UI.State
                 UserId = action.UserId
             };
         }
+
+
+        [ReducerMethod]
+        public static GameState ReduceConnectionState(GameState state, FetchingGameAction action)
+        {
+            return new GameState()
+            {
+                Fetching = action.Fetching,
+                OverallWinner = state.OverallWinner,
+                HasVoted = state.HasVoted,
+                CurrentResponses = state.CurrentResponses,
+                RoundCount = state.RoundCount,
+                CurrentPlayer = state.CurrentPlayer,
+                VoteTable = state.VoteTable,
+                Game = state.Game
+            };
+        }
+
     }
 }

@@ -6,27 +6,23 @@ using Fluxor;
 
 namespace CardsAgainstHumanity.UI.State.Games.Effects
 {
-    public class ReplacePlayerCardEffect : Effect<ReplacePlayerCardAction>
+    public class ReplacePlayerCardEffect : CommonUpdateGameEffect<ReplacePlayerCardAction>
     {
         private readonly IApiClient apiClient;
 
-        public ReplacePlayerCardEffect(IApiClient apiClient)
+        public ReplacePlayerCardEffect(IApiClient apiClient) : base(apiClient)
         {
             this.apiClient = apiClient;
         }
 
         protected override async Task HandleAsync(ReplacePlayerCardAction action, IDispatcher dispatcher)
         {
-            var game = await this.apiClient.ReplaceCard(action.InstanceName, new ReplacePlayerCardRequest()
+            await this.apiClient.ReplaceCard(action.InstanceName, new ReplacePlayerCardRequest()
             {
                 PlayerId = action.PlayerId,
                 CardIndex = action.CardIndex
             });
-
-            if (game != null)
-            {
-                dispatcher.Dispatch(new UpdateGameStateAction(game));
-            }
+            await this.TryUpdateGame(action, dispatcher);
         }
     }
 }

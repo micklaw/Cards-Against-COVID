@@ -2,7 +2,7 @@
 
 namespace CardsAgainstHumanity.Application.Models.Api
 {
-    public class GetOrCreateRequest
+    public class CreateRequest
     {
         [JsonProperty("name")]
         public string Name { get; set; }
