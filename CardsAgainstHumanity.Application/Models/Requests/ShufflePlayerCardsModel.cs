@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace CardsAgainstHumanity.Api.Models
+namespace CardsAgainstHumanity.Application.Models.Requests
 {
     public class ShufflePlayerCardsModel
     {

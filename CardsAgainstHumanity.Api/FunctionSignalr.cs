@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using CardsAgainstHumanity.Api.Extensions;
 using CardsAgainstHumanity.Application.Models.Api;
-using CardsAgainstHumanity.Application.State;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;

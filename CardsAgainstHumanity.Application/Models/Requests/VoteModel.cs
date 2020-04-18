@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CardsAgainstHumanity.Api.Models
+﻿namespace CardsAgainstHumanity.Application.Models.Requests
 {
     public class VoteModel
     {

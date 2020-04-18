@@ -5,7 +5,7 @@ using CardsAgainstHumanity.Application.Models;
 
 namespace CardsAgainstHumanity.Application.Interfaces
 {
-    public interface IGame
+    public interface IGame : IVersionable
     {
         string Url { get; set; }
 

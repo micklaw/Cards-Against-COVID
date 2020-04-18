@@ -1,18 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using CardsAgainstHumanity.Api.Models;
 using CardsAgainstHumanity.Application.Extensions;
 using CardsAgainstHumanity.Application.Interfaces;
 using CardsAgainstHumanity.Application.Models;
 using CardsAgainstHumanity.Application.Models.Api;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using CardsAgainstHumanity.Application.Models.Requests;
+using CardsAgainstHumanity.Application.Persistance.Attributes;
 
-namespace CardsAgainstHumanity.Application.State
+namespace CardsAgainstHumanity.Application.Persistance.Models.Entities
 {
-    public class Game : IGame
+    public class Game : ComplexTableEntity, IGame
     {
+        public Game()
+        {
+
+        }
+
+        public Game(string url)
+            : base("game", url)
+        {
+
+        }
+
         public string Url { get; set; }
 
         public string Name { get; set; }
@@ -21,10 +30,13 @@ namespace CardsAgainstHumanity.Application.State
 
         public int CardCount { get; set; } = 7;
 
+        [ComplexProperty]
         public IList<Player> Players { get; set; } = new List<Player>();
 
+        [ComplexProperty]
         public Round CurrentRound { get; set; }
 
+        [ComplexProperty]
         public IList<Round> PreviousRounds { get; set; } = new List<Round>();
 
         public bool IsOpen { get; set; } = true;
@@ -147,9 +159,5 @@ namespace CardsAgainstHumanity.Application.State
             CurrentRound?.ResetResponse(model.PlayerId);
             return this;
         }
-
-        [FunctionName(nameof(Game))]
-        public static Task Run([EntityTrigger] IDurableEntityContext ctx)
-            => ctx.DispatchAsync<Game>();
     }
 }
