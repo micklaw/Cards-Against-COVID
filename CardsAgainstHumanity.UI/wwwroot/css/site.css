@@ -169,3 +169,9 @@ app {
     animation: blink 1s step-start 0s infinite;
     -webkit-animation: blink 1s step-start 0s infinite;
 }
+
+.refreshing {
+    position: absolute;
+    top: 0;
+    right: 0;
+}

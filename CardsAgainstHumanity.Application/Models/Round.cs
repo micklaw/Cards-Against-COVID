@@ -23,7 +23,10 @@ namespace CardsAgainstHumanity.Application.Models
         {
             if (Votes != null && Votes.Any())
             {
-                WonBy = Votes.GroupBy(i => i).Select(i => new {PlayerId = i.Key, Count = i.Count()}).OrderByDescending(i => i.Count)?.FirstOrDefault()?.PlayerId ?? 0;
+                WonBy = Votes.GroupBy(i => i)
+                    .Select(i => new {PlayerId = i.Key, Count = i.Count()})
+                    .OrderByDescending(i => i.Count)?
+                    .FirstOrDefault()?.PlayerId ?? 0;
             }
         }
 
@@ -37,11 +40,6 @@ namespace CardsAgainstHumanity.Application.Models
             if (Responses == null)
             {
                 Responses = new List<Response>();
-            }
-
-            if (voterId == id)
-            {
-                return;
             }
 
             if (Responses.All(i => i.PlayerId != id))

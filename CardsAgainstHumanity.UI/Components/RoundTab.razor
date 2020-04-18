@@ -23,16 +23,16 @@
             }
         </ul>
 
-        <p><button type="button" class="btn btn-primary mb-3" @onclick="CloseResponses">Close</button></p>
+        <p><button type="button" class="btn btn-primary mb-3" @onclick="CloseResponses">Hide</button></p>
     }
 
     @if (GameState.Value.PartOfCurrentGame)
     {
-        <p><i>Don't fancy this prompt?</i></p>
+        <p><i>Change the prompt, or restart round.</i></p>
         <form>
             <div class="form-group">
-                <button type="button" class="btn btn-primary" @onclick="NewPrompt">Choose another</button>
-                <button type="button" class="btn btn-primary" @onclick="NewRound">Start again</button>
+                <button type="button" class="btn btn-primary" @onclick="NewPrompt">Change card</button>
+                <button type="button" class="btn btn-primary" @onclick="NewRound">Restart round</button>
             </div>
         </form>
     }
@@ -45,7 +45,7 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th class="text-right">Votes</th>
+                    <th class="text-right">Responses</th>
                     <th></th>
                 </tr>
             </thead>
@@ -53,7 +53,12 @@
                 @foreach (var response in GameState.Value.Game.CurrentRound.Responses)
                 {
                     <tr>
-                        <td>@GameState.Value.GetPlayerName(response.PlayerId, true)</td>
+                        <td>@GameState.Value.GetPlayerName(response.PlayerId, true)
+                            @if (GameState.Value.Game.CurrentRound.IsWon && GameState.Value.Game.CurrentRound.WonBy == response.PlayerId)
+                            {
+                                <span class="iconify" data-icon="typcn:star-outline" data-inline="false"></span>
+                            }
+                        </td>
                         <td class="text-right">@GameState.Value.GetCurrentRoundPlayerVotes(response.PlayerId)</td>
                         <td>
                             <div class="float-right">
@@ -75,7 +80,7 @@
                 <div class="form-group">
                     @if (!GameState.Value.Game.CurrentRound.IsWon && GameState.Value.Game.CurrentRound.HasResponses)
                     {
-                        <button type="button" class="btn btn-primary" @onclick="Reveal">Show winner</button>
+                        <button type="button" class="btn btn-primary" @onclick="Reveal">Reveal winner</button>
                     }
                     @if (GameState.Value.Game.CurrentRound.IsWon)
                     {

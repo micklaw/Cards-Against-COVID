@@ -32,7 +32,7 @@
 }
 else
 {
-    <p>No players have joined the game yet</p>
+    <p>No players have joined... yet</p>
 }
 
 @if (!GameState.Value.Game.IsOver)
@@ -43,9 +43,9 @@ else
         {
             <div class="form-group">
                 <div class="input-group">
-                    <input type="text" class="form-control" @bind="@PlayerName" placeholder="Make up a name, just like your girlfriend..." aria-label="">
+                    <input type="text" class="form-control" @bind="@PlayerName" placeholder="Your name... is shit" aria-label="">
                     <div class="input-group-append">
-                        <button class="btn btn-primary" type="button" @onclick="AddPlayer">Add player <span class="iconify" data-icon="oi:account-login" data-inline="false"></span></button>
+                        <button class="btn btn-primary" type="button" @onclick="AddPlayer">Join game <span class="iconify" data-icon="oi:account-login" data-inline="false"></span></button>
                     </div>
                 </div>
             </div>
@@ -59,13 +59,13 @@ else
         <div class="form-group mt-2">
             @if (!GameState.Value.Game.IsOpen)
             {
-                <button type="button" class="btn btn-success" @onclick="Open">Open  <span class="iconify" data-icon="oi:lock-unlocked" data-inline="false"></span></button>
+                <button type="button" class="btn btn-success" @onclick="Open">Open the game <span class="iconify" data-icon="oi:lock-unlocked" data-inline="false"></span></button>
             }
             else
             {
-                <button type="button" class="btn btn-danger" @onclick="Close">Lock <span class="iconify" data-icon="oi:lock-locked" data-inline="false"></span></button>
+                <button type="button" class="btn btn-danger" @onclick="Close">Shut the game <span class="iconify" data-icon="oi:lock-locked" data-inline="false"></span></button>
             }
-            <button type="button" class="btn btn-primary" @onclick="Finish">Finish</button>
+            <button type="button" class="btn btn-primary" @onclick="Finish">End game</button>
         </div>
     </form>
 }
