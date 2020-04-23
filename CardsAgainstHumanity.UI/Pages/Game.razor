@@ -1,5 +1,4 @@
 ﻿@page "/game/{instance}"
-@using System.Timers
 @inherits FluxorComponent
 @inject IState<GameState> GameState
 @inject IDispatcher Dispatcher
@@ -20,8 +19,6 @@ else
 
 @code
 {
-    private Timer Timer { get; set; }
-
     [Parameter]
     public string Instance { get; set; }
 
@@ -33,20 +30,6 @@ else
         {
             Dispatcher.Dispatch(new ReadGameAction(Instance));
         }
-
-        Timer = new Timer(5000);
-
-        Timer.Elapsed += (sender, args) =>
-        {
-            if (GameState.Value.Fetching)
-            {
-                return;
-            }
-
-            Dispatcher.Dispatch(new ReadGameAction(Instance));
-        };
-
-        Timer.Start();
 
         var apiUrl = Config["apiUri"];
 
@@ -72,15 +55,6 @@ else
         await hubConnection.StartAsync();
 
         Dispatcher.Dispatch(new ConnectToGameGroupAction(Instance, hubConnection.ConnectionId));
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            Timer.Stop();
-            Timer.Dispose();
-        }
     }
 }
  

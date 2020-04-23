@@ -7,9 +7,10 @@
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.10" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.SignalRService" Version="1.1.0" />
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.5" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.6" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ActorTableEntities\ActorTableEntities.csproj" />
     <ProjectReference Include="..\CardsAgainstHumanity.Application\CardsAgainstHumanity.Application.csproj" />
   </ItemGroup>
   <ItemGroup>

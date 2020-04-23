@@ -1,9 +1,4 @@
-﻿using System;
-using CardsAgainstHumanity.Application.Interfaces;
-using CardsAgainstHumanity.Application.Persistance;
-using CardsAgainstHumanity.Application.Persistance.Models.Entities;
-using CardsAgainstHumanity.Application.Persistance.Tables;
-using CardsAgainstHumanity.Application.Services;
+﻿using CardsAgainstHumanity.Application.Services;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,12 +9,7 @@ namespace CardsAgainstHumanity.Api
     {
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
-
-            builder.Services.AddSingleton(new DistributedLock(connectionString, "cah-mutex", "CardsAgainstHumanity.Api.Startup"));
-            builder.Services.AddSingleton(new TableStorageProvider(connectionString));
             builder.Services.AddSingleton<ICardService, CardService>();
-            builder.Services.AddSingleton<IPersistanceProvider<Game>, GameTableProvider>();
         }
     }
 }

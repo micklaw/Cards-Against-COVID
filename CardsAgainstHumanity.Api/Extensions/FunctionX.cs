@@ -1,17 +1,13 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
+using ActorTableEntities;
 using CardsAgainstHumanity.Application.Extensions;
-using CardsAgainstHumanity.Application.Interfaces;
-using CardsAgainstHumanity.Application.Models;
-using CardsAgainstHumanity.Application.Persistance;
-using CardsAgainstHumanity.Application.Persistance.Models.Entities;
+using CardsAgainstHumanity.Application.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.SignalRService;
-using Microsoft.WindowsAzure.Storage;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -38,30 +34,16 @@ namespace CardsAgainstHumanity.Api.Extensions
             return req.RouteValues[property].ToString();
         }
 
-        public static async Task<IActionResult> Orchestrate(this DistributedLock mutex, HttpRequest req, IPersistanceProvider<Game> persistance, IAsyncCollector<SignalRMessage> signalRMessages, Func<Game, Game> action)
+        public static async Task<IActionResult> Orchestrate(this IActorTableEntityClient entityClient, string name, IAsyncCollector<SignalRMessage> signalRMessages, Action<Game> action = null)
         {
-            return await mutex.LockExecute(async () =>
-            {
-                var name = req.RouteValues["instance"].ToString();
-                var response = await persistance.Get(name);
+            await using var state = await entityClient.GetLocked<Game>("game", name.Slugify());
 
-                if (response.Result == null)
-                {
-                    return new NotFoundResult();
-                }
+            action?.Invoke(state.Entity);
 
-                var game = action(response.Result);
-                var saveResponse = await persistance.InsertOrReplace(game);
+            await state.Flush();
+            await signalRMessages.TrySignalGroupUpdated(name);
 
-                if (!saveResponse.StatusCode.IsSuccess())
-                {
-                    return new StatusCodeResult(saveResponse.StatusCode);
-                }
-
-                await signalRMessages.TrySignalGroupUpdated(name);
-
-                return new OkObjectResult(saveResponse.Result);
-            });
+            return new OkObjectResult(state.Entity);
         }
 
         public static Task TrySignalGroupUpdated(this IAsyncCollector<SignalRMessage> signalRMessages, string gameUrl)
@@ -73,45 +55,6 @@ namespace CardsAgainstHumanity.Api.Extensions
                     GroupName = gameUrl,
                     Arguments = new[] { gameUrl }
                 });
-        }
-
-        public static async Task<IActionResult> LockExecute(this DistributedLock mutex, Func<Task<IActionResult>> action)
-        {
-            try
-            {
-                await mutex.AcquireAsync();
-            }
-            catch (StorageException)
-            {
-                return new ConflictResult();
-            }
-
-            var job = action();
-
-            var timer = new System.Timers.Timer(10000);
-
-            timer.Elapsed += async (sender, e) =>
-            {
-                if (job.IsCompleted)
-                {
-                    await mutex.ReleaseAsync();
-                }
-                else
-                {
-                    await mutex.RenewAsync();
-                }
-            };
-
-            timer.Start();
-
-            var result = await job.ConfigureAwait(false);
-
-            await mutex.ReleaseAsync();
-
-            timer.Stop();
-            timer.Dispose();
-
-            return result;
         }
     }
 }

@@ -3,26 +3,23 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using CardsAgainstHumanity.Application.Persistance.Attributes;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 
-namespace CardsAgainstHumanity.Application.Persistance.Models.Entities
+namespace ActorTableEntities
 {
-    public abstract class ComplexTableEntity : TableEntity
+    public abstract class ActorTableEntity : TableEntity
     {
-        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> cache = new ConcurrentDictionary<Type, PropertyInfo[]>();
+        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> Cache = new ConcurrentDictionary<Type, PropertyInfo[]>();
 
-        protected ComplexTableEntity()
+        protected ActorTableEntity()
         {
-            
         }
 
-        protected ComplexTableEntity(string partitionKey, string rowKey)
+        protected ActorTableEntity(string partitionKey, string rowKey)
             : base(partitionKey, rowKey)
         {
-            
         }
 
         public override IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
@@ -58,15 +55,15 @@ namespace CardsAgainstHumanity.Application.Persistance.Models.Entities
         {
             var type = this.GetType();
 
-            cache.TryGetValue(type, out PropertyInfo[] properties);
+            Cache.TryGetValue(type, out PropertyInfo[] properties);
 
             if (properties == null)
             {
                 properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(i => i.GetCustomAttribute<ComplexPropertyAttribute>() != null)
+                    .Where(i => i.GetCustomAttribute<ActorTableEntityComplexPropertyAttribute>() != null)
                     .ToArray();
 
-                cache.TryAdd(type, properties);
+                Cache.TryAdd(type, properties);
             }
 
             return properties;

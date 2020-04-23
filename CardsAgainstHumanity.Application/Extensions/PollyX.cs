@@ -17,13 +17,5 @@ namespace CardsAgainstHumanity.Application.Extensions
 
             return response.Result;
         }
-
-        public static async Task WithRetry<TClient>(this TClient client, Func<TClient, Task> method, int attempts = 4, double backOffFactor = 1.0)
-        {
-            await Policy
-                .Handle<Exception>()
-                .WaitAndRetryAsync(attempts, count => TimeSpan.FromMilliseconds(count * backOffFactor))
-                .ExecuteAsync(() => method(client));
-        }
     }
 }

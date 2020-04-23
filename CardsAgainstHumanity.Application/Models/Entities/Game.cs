@@ -1,15 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using ActorTableEntities;
 using CardsAgainstHumanity.Application.Extensions;
 using CardsAgainstHumanity.Application.Interfaces;
-using CardsAgainstHumanity.Application.Models;
 using CardsAgainstHumanity.Application.Models.Api;
 using CardsAgainstHumanity.Application.Models.Requests;
-using CardsAgainstHumanity.Application.Persistance.Attributes;
 
-namespace CardsAgainstHumanity.Application.Persistance.Models.Entities
+namespace CardsAgainstHumanity.Application.Models.Entities
 {
-    public class Game : ComplexTableEntity, IGame
+    public class Game : ActorTableEntity, IGame
     {
         public Game()
         {
@@ -30,13 +29,13 @@ namespace CardsAgainstHumanity.Application.Persistance.Models.Entities
 
         public int CardCount { get; set; } = 7;
 
-        [ComplexProperty]
+        [ActorTableEntityComplexProperty]
         public IList<Player> Players { get; set; } = new List<Player>();
 
-        [ComplexProperty]
+        [ActorTableEntityComplexProperty]
         public Round CurrentRound { get; set; }
 
-        [ComplexProperty]
+        [ActorTableEntityComplexProperty]
         public IList<Round> PreviousRounds { get; set; } = new List<Round>();
 
         public bool IsOpen { get; set; } = true;
