@@ -2,8 +2,8 @@
 using System.IO;
 using System.Threading.Tasks;
 using ActorTableEntities;
+using CardsAgainstHumanity.Api.Entities;
 using CardsAgainstHumanity.Application.Extensions;
-using CardsAgainstHumanity.Application.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;

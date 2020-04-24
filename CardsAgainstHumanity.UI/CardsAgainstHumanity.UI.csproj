@@ -7,14 +7,14 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="2.1.5" />
-    <PackageReference Include="Fluxor" Version="3.1.0-Pre-2" />
-    <PackageReference Include="Fluxor.Blazor.Web" Version="3.1.0-Pre-2" />
-    <PackageReference Include="Fluxor.Blazor.Web.ReduxDevTools" Version="3.1.0-Pre-2" />
+    <PackageReference Include="Fluxor" Version="3.1.1-preview1" />
+    <PackageReference Include="Fluxor.Blazor.Web" Version="3.1.1-preview1" />
+    <PackageReference Include="Fluxor.Blazor.Web.ReduxDevTools" Version="3.1.1-preview1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="3.2.0-preview3.20168.3" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Build" Version="3.2.0-preview3.20168.3" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="3.2.0-preview3.20168.3" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.HttpClient" Version="3.2.0-preview3.20168.3" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.0-preview.2.20167.3" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.0-preview.3.20215.14" />
     <PackageReference Include="Polly" Version="7.2.0" />
     <PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
     <PackageReference Include="Refit" Version="5.1.27" />

@@ -3,10 +3,11 @@ using System.Linq;
 using ActorTableEntities;
 using CardsAgainstHumanity.Application.Extensions;
 using CardsAgainstHumanity.Application.Interfaces;
+using CardsAgainstHumanity.Application.Models;
 using CardsAgainstHumanity.Application.Models.Api;
 using CardsAgainstHumanity.Application.Models.Requests;
 
-namespace CardsAgainstHumanity.Application.Models.Entities
+namespace CardsAgainstHumanity.Api.Entities
 {
     public class Game : ActorTableEntity, IGame
     {
