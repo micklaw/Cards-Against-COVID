@@ -27,7 +27,7 @@ namespace CardsAgainstHumanity.UI.State.Games.Models
 
         public bool IsOver { get; set; }
 
-        public Dictionary<int, int> Score => PreviousRounds?.GroupBy(i => i.WonBy).ToDictionary(i => Players.First(p => p.Id == i.Key).Id, i => i.Count());
+        public Dictionary<int, int> Score => PreviousRounds?.GroupBy(i => i.WonBy).ToDictionary(i => i.Key, i => i.Count());
 
         public string ETag { get; set; }
     }

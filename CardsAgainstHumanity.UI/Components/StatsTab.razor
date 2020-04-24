@@ -20,7 +20,7 @@
         <tbody>
             @foreach (var player in GameState.Value.Game.Players)
             {
-                var score = GameState.Value.Game?.Score?.FirstOrDefault(i => i.Key == player.Id).Key ?? 0;
+                var score = GameState.Value.Game?.Score?.FirstOrDefault(i => i.Key == player.Id).Value ?? 0;
 
                 <tr>
                     <td>@player.Name</td>
