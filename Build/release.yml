@@ -38,3 +38,19 @@ steps:
     appName: $(Devops:Pipeline:FunctionName)
     package: '$(Build.ArtifactStagingDirectory)/CardsAgainstHumanity.Api.$(Build.BuildId).zip'
     appSettings: '-APPINSIGHTS_INSTRUMENTATIONKEY $(Devops:Pipeline:AppInsightsKey) -APPLICATIONINSIGHTS_CONNECTION_STRING InstrumentationKey=$(Devops:Pipeline:AppInsightsKey) -AzureWebJobsStorage $(Devops:Pipeline:StorageConnection) -AzureWebJobsDashboard $(Devops:Pipeline:StorageConnection) -AzureSignalRConnectionString $(Devops:Pipeline:SignalrConnection)'
+
+- task: ExtractFiles@1
+  displayName: 'Extract files'
+  inputs:
+    archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/drop/CardsAgainstHumanity.UI.zip'
+    destinationFolder: '$(Agent.BuildDirectory)/CAH/extract'
+    cleanDestinationFolder: true 
+
+- task: AzureFileCopy@3
+  displayName: 'AzureBlob File Copy: $(Devops_Storage_WASM_Name)'
+  inputs:
+    SourcePath: '$(Agent.BuildDirectory)/CAH/extract/wwwroot'
+    azureSubscription: ${{ parameters.serviceConnection }}
+    Destination: AzureBlob
+    storage: 'stcardshumanity'
+    ContainerName: '$web'

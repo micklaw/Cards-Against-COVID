@@ -7,33 +7,15 @@ trigger:
 pr:
   branches:
     include:
-    - feature/*
-    - release/*
-    - hotfix/*
-    - pull-request/*
+    - '*'
 
 pool:
   vmImage: 'windows-latest'
 
-variables:
-  GitVersion.SemVer: ''
-
 stages:
-- stage: 'Setup'
-  displayName: 'Setup build'
-  jobs:
-  - job: 'Version'
-    displayName: 'Version Build'
-    steps:
-    - task: UseGitVersion@5
-      displayName: gitversion
-      inputs:
-        versionSpec: '5.x'
-        updateAssemblyInfo: false
 
 - stage: 'Build'
   displayName: 'Build'
-  dependsOn: ['Setup']
   jobs:
   - job: 'Build'
     displayName: 'Build & Publish Artifacts'
@@ -45,7 +27,7 @@ stages:
 - stage: 'Release' 
   displayName: 'Release to Live'
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
-  dependsOn: ['Setup','Build']
+  dependsOn: ['Build']
   jobs:
   - deployment: 'Appplication'
     displayName: 'Api & UI deployment'

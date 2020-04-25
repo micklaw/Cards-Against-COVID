@@ -1,4 +1,14 @@
 steps:
+- task: DotNetCoreCLI@2  
+  displayName: Install NBGV tool
+  inputs:
+    command: custom
+    custom: tool
+    arguments: install --tool-path . nbgv
+
+- script: nbgv cloud
+  displayName: Set Version
+
 - task: Bash@3
   displayName: 'List Environment Variables'
   inputs:
