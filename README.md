@@ -5,7 +5,7 @@ This game should contain about 7k black prompt cards and about 24k White respons
 
 **NOTE: As per CAH's T&Cs, I am not making anything off this and anyone who wants it can have it**
 
-[![Build Status](https://dev.azure.com/mlwdltd/Actor%20Table%20Entities/_apis/build/status/micklaw.Actor-Table-Entities?branchName=develop)](https://dev.azure.com/mlwdltd/Actor%20Table%20Entities/_build/latest?definitionId=10&branchName=develop)
+[![Build Status](https://dev.azure.com/mlwdltd/Cards%20Against%20COVID/_apis/build/status/micklaw.Cards-Against-COVID?branchName=develop)](https://dev.azure.com/mlwdltd/Cards%20Against%20COVID/_build/latest?definitionId=11&branchName=develop)
 
 ## Why?
 Why the fuck not?
