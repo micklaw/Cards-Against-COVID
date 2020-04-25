@@ -1,84 +1,88 @@
-# Actor Table Entities
-A play on Azure Functions Durable Entities without the queuing. Locks a blob behind the scenes to ensure the actor can only be amended once, then free us for the next connection.
+# Cards Against COVID
+I hate COVID-19, keeping us all couped up inside, but you know what I do love, Cards Against Humanity, and Blazor, and Azure Functions. So all of that combined with some free time and free zure credits has produced this monstrosity.
+
+This game should contain about 7k black prompt cards and about 24k White response cards, so I think that is just about every card ever made.
+
+**NOTE: As per CAH's T&Cs, I am not making anything off this and anyone who wants it can have it**
 
 [![Build Status](https://dev.azure.com/mlwdltd/Actor%20Table%20Entities/_apis/build/status/micklaw.Actor-Table-Entities?branchName=develop)](https://dev.azure.com/mlwdltd/Actor%20Table%20Entities/_build/latest?definitionId=10&branchName=develop)
 
-## Why not use Durable Entities?
-I did, honestly, and yes they are amazing, but for my specific use case they did fit well. I wanted something that was:
+## Why?
+Why the fuck not?
 
-* Quick to respond
-* Wasn't meant for scale on a single entity (Max 10-20 consumers of an entity)
-* Controllable via standard functions
-* Cheaper
+## How do I play
+These rules may be lightly adapted for me and my friend, as it was built for us and not you, so STFU.
 
-Where as durableEntities are great, due to the nature of the queuing involved using Orchestrator functions, it meant when release I could wait or a good few seconds anywhere between 2-10
-for my request to complete, then if it did, I would generally have to get a status endpoint to monitor my result.
+### Start or join a game
 
-Next up I attempted to go straight to the Entity and its operations, but the lack of responses from the operations without meaningful HTTP responses stopped me.
+![](./docs/1.home.JPG)
 
-So, I built this...
+Literally type a name for the lobby, click start
 
-## Usage
-So this is a typical entity, inheriting from ITableEntity, it will allow you to put complex types as properties, it will also allow for you to interact with the actual entity by claiming a lock
-just before reading, if it fails to get a lock, it will retry every Xms for X attempts as defined in your config.
+![](./docs/2.entername.JPG)
 
-```csharp
-public class Counter : ActorTableEntity
-{
-    public int Count { get; set; }
+Enter your name and click, Join game
 
-    public Counter Increment()
-    {
-        Count = Count + 1;
+![](./docs/3.playing.JPG)
 
-        return this;
-    }
-}
-```
+You should now have joined the game
 
-You can see a sample function in the main project, but it looks a bit like this.
+![](./docs/9.locked.JPG)
 
-```csharp
-[FunctionName("UpdateHttpApi")]
-public async Task<IActionResult> Update(
-    [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "update/{name}")] HttpRequest req, string name,
-    [ActorTableEntity] IActorTableEntityClient entityClient)
-{
-    await using var state = await entityClient.GetLocked<Counter>("entity", name);
+You can also lock the game so others cant join
 
-    state.Entity.Increment();
+### Round
 
-    await state.Flush();
+![](./docs/7.new-round.JPG)
 
-    return new OkObjectResult(state.Entity);
-}
-```
+Hit the New round button to bring up a prompt 'black' card
 
-The code above lets you take a hold of an entity, do some stuff on it, then release the lock, allowing the next punter to take it up.
+![](./docs/8.prompt.JPG)
 
-## Setup
-Finally, install the nuget package above, and bootstrap your code like so.
+If you dont like it, you can change the prompt and users can reset their responses, or you can simply restart the round and start it again
 
-```csharp
-public class Startup : IWebJobsStartup
-{
-    public void Configure(IWebJobsBuilder builder)
-    {
-        builder.AddActorTableEntities(options =>
-        {
-            options.StorageConnectionString = "UseDevelopmentStorage=true";
-            options.ContainerName = "entitylocks";
-            options.WithRetry = true;
-            options.RetryIntervalMilliseconds = 100;
-        });
-    }
-}
-```
+### Your cards
 
-## Built with it
+![](./docs/4.cards.JPG)
 
-### Cards Against COVID
+Top right nav is all your cards
+
+![](./docs/5.cards-replce.JPG)
+
+If you dont like them, you can mix it up by replacing one, or scrolling to the bottom of the cards page and changing them all.
+
+![](./docs/6.respond.JPG)
+
+When you find the card(s) to play, click select, then scroll to the bottom and hit Respond
+
+### Viewing and Voting
+
+![](./docs/10.view.JPG)
+
+Once everyone has voted you can have a look at their responses, or read them out if you like
+
+![](./docs/11.voted.JPG)
+
+You can then vote for your favourite, even yourself you scumbag.
+
+![](./docs/12.winner.JPG)
+
+Then you can hit the Reveal winner button to see who was the most offensive.
+
+### Completing
+
+![](./docs/13.leaderboard.JPG)
+
+When you start a new round the leaderboard on the front Stats page is updated to reflect the last round winner.
+
+![](./docs/14.game-over.JPG)
+
+When the game is over the person with the most black card round wins is the champ.
+
+## Built with
+
+### Azure Function Actor Table Entities
 
 Have a play and see what you think, I built this with it:
 
-https://stcardshumanity.z33.web.core.windows.net/
+[https://github.com/micklaw/Actor-Table-Entities](https://github.com/micklaw/Actor-Table-Entities)

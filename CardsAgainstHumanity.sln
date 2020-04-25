@@ -25,6 +25,24 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipeline", "Pipeline", "{72
 		Build\release.yml = Build\release.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{C37A3EB3-254A-47C2-9C6A-5A6B7581A716}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\1.home.JPG = Docs\1.home.JPG
+		Docs\10.view.JPG = Docs\10.view.JPG
+		Docs\11.voted.JPG = Docs\11.voted.JPG
+		Docs\12.winner.JPG = Docs\12.winner.JPG
+		Docs\13.leaderboard.JPG = Docs\13.leaderboard.JPG
+		Docs\14.game-over.JPG = Docs\14.game-over.JPG
+		Docs\2.entername.JPG = Docs\2.entername.JPG
+		Docs\3.playing.JPG = Docs\3.playing.JPG
+		Docs\4.cards.JPG = Docs\4.cards.JPG
+		Docs\5.cards-replce.JPG = Docs\5.cards-replce.JPG
+		Docs\6.respond.JPG = Docs\6.respond.JPG
+		Docs\7.new-round.JPG = Docs\7.new-round.JPG
+		Docs\8.prompt.JPG = Docs\8.prompt.JPG
+		Docs\9.locked.JPG = Docs\9.locked.JPG
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
