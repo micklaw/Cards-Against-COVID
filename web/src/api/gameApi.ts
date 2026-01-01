@@ -3,7 +3,7 @@ import axios from 'axios';
 import type { AxiosInstance } from 'axios';
 import type { Game, PollingResponse } from '../types/game';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:7071/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 class GameApi {
   private client: AxiosInstance;

@@ -290,3 +290,5 @@ __pycache__/
 SmithEng.Invoices/src/**/*.js
 SmithEng.Invoices/src/**/*.map
 /Source/SmithEng.Invoices/wwwroot/js
+
+.azurite/

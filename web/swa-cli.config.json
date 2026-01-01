@@ -2,8 +2,7 @@
   "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
   "configurations": {
     "app": {
-      "appLocation": ".",
-      "outputLocation": "dist",
+      "appDevserverUrl": "http://localhost:5173",
       "apiDevserverUrl": "http://localhost:7071",
       "run": "npm run dev",
       "swaPort": 4280

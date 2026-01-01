@@ -10,13 +10,13 @@
     <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ActorTableEntities" Version="2.0.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.24.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.18.1" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.2.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage" Version="6.6.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Actor-Table-Entities\ActorTableEntities\ActorTableEntities.csproj" />
     <ProjectReference Include="..\CardsAgainstHumanity.Application\CardsAgainstHumanity.Application.csproj" />
   </ItemGroup>
   <ItemGroup>
