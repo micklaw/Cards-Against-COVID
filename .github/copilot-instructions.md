@@ -10,21 +10,13 @@ Cards Against COVID is a web-based implementation of Cards Against Humanity buil
 
 ### Project Structure
 
-This solution consists of three main projects:
+This solution consists of two main folders:
 
-1. **CardsAgainstHumanity.Application** (.NET 8.0)
-   - Shared business logic and models
-   - Card services and word list management
-   - Common interfaces and extensions
+1. **api/** - .NET 8.0 Backend
+   - **CardsAgainstHumanity.Application** - Shared business logic and models, card services and word list management, common interfaces and extensions
+   - **CardsAgainstHumanity.Api** - Azure Functions v4 serverless backend (Isolated Worker Model), HTTP triggers for game operations, long polling for real-time state updates, Actor Table Entities for state management, OpenTelemetry instrumentation
 
-2. **CardsAgainstHumanity.Api** (.NET 8.0)
-   - Azure Functions v4 serverless backend (Isolated Worker Model)
-   - HTTP triggers for game operations
-   - Long polling for real-time state updates
-   - Actor Table Entities for state management
-   - OpenTelemetry instrumentation
-
-3. **CardsAgainstHumanity.Web** (React + TypeScript)
+2. **web/** - React + TypeScript Frontend
    - React client-side application with Vite
    - Redux Toolkit for state management
    - Axios for API communication
@@ -92,6 +84,7 @@ This solution consists of three main projects:
 
 ```bash
 # Backend - Restore dependencies
+cd api
 dotnet restore
 
 # Backend - Build the solution
@@ -101,7 +94,7 @@ dotnet build --configuration Release
 dotnet build CardsAgainstHumanity.Api/CardsAgainstHumanity.Api.csproj
 
 # Frontend - Install dependencies
-cd CardsAgainstHumanity.Web
+cd web
 npm install
 
 # Frontend - Build
@@ -114,13 +107,13 @@ npm run dev
 ### Running Locally
 
 ```bash
-# Run Azure Functions locally
-cd CardsAgainstHumanity.Api
+# Run Azure Functions locally (in one terminal)
+cd api/CardsAgainstHumanity.Api
 func start
 
-# Run React dev server (in a separate terminal)
-cd CardsAgainstHumanity.Web
-npm run dev
+# Run SWA CLI with React dev server (in another terminal)
+cd web
+npm run start
 ```
 
 ### CI/CD Pipeline
@@ -238,19 +231,19 @@ Pipeline stages:
 
 ### Adding a New Game Feature
 
-1. Add models to `CardsAgainstHumanity.Application/Models`
-2. Create or update services in `Application/Services`
-3. Add Azure Function trigger in `Api/FunctionTriggers.cs`
-4. Create Redux slice in `Web/src/store/slices`
+1. Add models to `api/CardsAgainstHumanity.Application/Models`
+2. Create or update services in `api/CardsAgainstHumanity.Application/Services`
+3. Add Azure Function trigger in `api/CardsAgainstHumanity.Api/FunctionTriggers.cs`
+4. Create Redux slice in `web/src/store/slices`
 5. Update React components to use new state/actions
 6. Increment Version in Game entity when state changes
 
 ### Adding a New API Endpoint
 
-1. Add method to `Api/FunctionTriggers.cs` with `[Function]` attribute
+1. Add method to `api/CardsAgainstHumanity.Api/FunctionTriggers.cs` with `[Function]` attribute
 2. Use appropriate HTTP trigger attributes and route
 3. Inject required services through constructor
-4. Add corresponding API call in `Web/src/api/gameApi.ts`
+4. Add corresponding API call in `web/src/api/gameApi.ts`
 5. Create Redux async thunk to call the new endpoint
 
 ### Implementing Long Polling
@@ -263,8 +256,8 @@ Pipeline stages:
 
 ### Modifying Card Content
 
-- Black cards (prompts) are in `Application/Wordlists/blackwords.txt`
-- White cards (responses) are in `Application/Wordlists/whitewords.txt`
+- Black cards (prompts) are in `api/CardsAgainstHumanity.Application/Wordlists/blackwords.txt`
+- White cards (responses) are in `api/CardsAgainstHumanity.Application/Wordlists/whitewords.txt`
 - These files are embedded resources in the Application project
 
 ## Additional Notes

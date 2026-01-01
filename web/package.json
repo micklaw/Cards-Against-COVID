@@ -8,8 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "swa start --config swa-cli.config.json",
-    "start:swa": "swa start dist --api-location ../CardsAgainstHumanity.Api"
+    "start": "swa start --config swa-cli.config.json"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",

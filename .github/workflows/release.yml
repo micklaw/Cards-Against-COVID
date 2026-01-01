@@ -41,20 +41,23 @@ jobs:
         node-version: ${{ env.NODE_VERSION }}
         
     - name: Restore dependencies
+      working-directory: ./api
       run: dotnet restore
       
     - name: Build solution
+      working-directory: ./api
       run: dotnet build --configuration Release --no-restore
       
     - name: Publish API
-      run: dotnet publish CardsAgainstHumanity.Api/CardsAgainstHumanity.Api.csproj --configuration Release --output ./api-output
+      working-directory: ./api
+      run: dotnet publish CardsAgainstHumanity.Api/CardsAgainstHumanity.Api.csproj --configuration Release --output ../api-output
     
     - name: Install React dependencies
-      working-directory: ./CardsAgainstHumanity.Web
+      working-directory: ./web
       run: npm ci
       
     - name: Build React frontend
-      working-directory: ./CardsAgainstHumanity.Web
+      working-directory: ./web
       run: npm run build
       
     - name: Upload API artifact
@@ -67,7 +70,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: frontend-package
-        path: ./CardsAgainstHumanity.Web/dist
+        path: ./web/dist
 
   deploy-infrastructure:
     runs-on: ubuntu-latest

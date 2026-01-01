@@ -40,6 +40,7 @@ Why the fuck not?
 ### Build the solution
 
 ```bash
+cd api
 dotnet restore
 dotnet build --configuration Release
 ```
@@ -50,16 +51,22 @@ The Azure Static Web Apps CLI provides local development with automatic API rout
 
 1. **Set up local.settings.json for Azure Functions**:
    ```bash
-   cd CardsAgainstHumanity.Api
+   cd api/CardsAgainstHumanity.Api
    cp local.settings.json.example local.settings.json
    # Edit local.settings.json with your storage connection strings
    ```
 
 2. **Option 1 - Use SWA CLI (Recommended)**:
    
-   This will start both the React app and Azure Functions together with proper routing:
+   First, start the API in one terminal:
    ```bash
-   cd CardsAgainstHumanity.Web
+   cd api/CardsAgainstHumanity.Api
+   func start
+   ```
+   
+   Then, in another terminal, start the SWA CLI:
+   ```bash
+   cd web
    npm install
    npm start
    ```
@@ -70,13 +77,13 @@ The Azure Static Web Apps CLI provides local development with automatic API rout
    
    **Terminal 1 - Start the API (Azure Functions)**:
    ```bash
-   cd CardsAgainstHumanity.Api
+   cd api/CardsAgainstHumanity.Api
    func start
    ```
    
    **Terminal 2 - Start the React app**:
    ```bash
-   cd CardsAgainstHumanity.Web
+   cd web
    npm install
    npm run dev
    ```
@@ -129,11 +136,15 @@ Deployment is automated via GitHub Actions:
 
 ```
 .
-├── CardsAgainstHumanity.Api/          # Azure Functions backend (.NET 8.0)
-├── CardsAgainstHumanity.Application/  # Shared business logic (.NET 8.0)
-├── CardsAgainstHumanity.Web/          # React + TypeScript frontend
+├── api/                               # .NET 8.0 Backend
+│   ├── CardsAgainstHumanity.Api/      # Azure Functions backend
+│   ├── CardsAgainstHumanity.Application/ # Shared business logic
+│   ├── CardsAgainstHumanity.sln       # .NET solution file
+│   └── Directory.Build.props          # Build properties
+├── web/                               # React + TypeScript frontend
 │   ├── src/                           # React components and logic
-│   ├── staticwebapp.config.json       # Static Web App routing config
+│   ├── public/
+│   │   └── staticwebapp.config.json   # Static Web App routing config
 │   └── swa-cli.config.json            # SWA CLI local development config
 ├── infrastructure/                     # Bicep infrastructure templates
 │   ├── main.bicep                     # Main infrastructure template
@@ -153,7 +164,7 @@ Current version: **1.0.0**
 
 ## NuGet Package
 
-The `CardsAgainstHumanity.Application` library contains shared business logic and is used by both the API and frontend projects.
+The `api/CardsAgainstHumanity.Application` library contains shared business logic and is used by the API project.
 
 ## How do I play
 

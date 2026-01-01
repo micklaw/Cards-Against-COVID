@@ -3,13 +3,9 @@
   "configurations": {
     "app": {
       "appLocation": ".",
-      "apiLocation": "../CardsAgainstHumanity.Api",
       "outputLocation": "dist",
-      "appDevserverUrl": "http://localhost:5173",
       "apiDevserverUrl": "http://localhost:7071",
       "run": "npm run dev",
-      "apiPort": 7071,
-      "appPort": 5173,
       "swaPort": 4280
     }
   }
