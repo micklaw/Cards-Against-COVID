@@ -1,16 +1,126 @@
 # Cards Against COVID
-I hate COVID-19, keeping us all couped up inside, but you know what I do love, Cards Against Humanity, and Blazor, and Azure Functions. So all of that combined with some free time and free zure credits has produced this monstrosity.
+
+I hate COVID-19, keeping us all couped up inside, but you know what I do love, Cards Against Humanity, and Blazor, and Azure Functions. So all of that combined with some free time and free Azure credits has produced this monstrosity.
 
 This game should contain about 7k black prompt cards and about 24k White response cards, so I think that is just about every card ever made.
 
 **NOTE: As per CAH's T&Cs, I am not making anything off this and anyone who wants it can have it**
 
-[![Build Status](https://dev.azure.com/mlwdltd/Cards%20Against%20COVID/_apis/build/status/micklaw.Cards-Against-COVID?branchName=develop)](https://dev.azure.com/mlwdltd/Cards%20Against%20COVID/_build/latest?definitionId=11&branchName=develop)
-
 ## Why?
 Why the fuck not?
 
+## Technology Stack
+
+- **Frontend**: Blazor WebAssembly (.NET 8.0)
+- **Backend**: Azure Functions (.NET 6.0) with isolated backend
+- **State Management**: Fluxor (Redux pattern)
+- **Infrastructure**: Azure Static Web Apps + Azure Functions + Azure SignalR + Azure Table Storage
+- **Deployment**: GitHub Actions + Bicep IaC
+- **Real-time**: SignalR for live game updates
+- **Observability**: Application Insights with OpenTelemetry support
+
+## Prerequisites
+
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 6.0 SDK](https://dotnet.microsoft.com/download/dotnet/6.0) (for Azure Functions)
+- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) (for deployment)
+- [Azure Functions Core Tools](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local) (for local development)
+
+## Local Development
+
+### Build the solution
+
+```bash
+dotnet restore
+dotnet build --configuration Release
+```
+
+### Run locally
+
+You'll need to set up local Azure Storage emulator or use Azure Storage connection string.
+
+1. **Start the API (Azure Functions)**:
+   ```bash
+   cd CardsAgainstHumanity.Api
+   func start
+   ```
+
+2. **Start the UI (Blazor WebAssembly)**:
+   ```bash
+   cd CardsAgainstHumanity.UI
+   dotnet run
+   ```
+
+## Deployment
+
+### Infrastructure Deployment
+
+The infrastructure is managed using Bicep templates in the `infrastructure/` directory.
+
+1. **Login to Azure**:
+   ```bash
+   az login
+   ```
+
+2. **Create Resource Group**:
+   ```bash
+   az group create --name rg-cards-against-covid --location eastus
+   ```
+
+3. **Deploy Infrastructure**:
+   ```bash
+   az deployment group create \
+     --resource-group rg-cards-against-covid \
+     --template-file infrastructure/main.bicep \
+     --parameters infrastructure/parameters.json
+   ```
+
+### GitHub Actions Deployment
+
+Deployment is automated via GitHub Actions:
+
+- **PR Build** (`.github/workflows/pr-build.yml`): Builds and validates on pull requests
+- **Release** (`.github/workflows/release.yml`): Deploys infrastructure and applications to Azure
+
+#### Setup GitHub Secrets
+
+1. Create an Azure Service Principal:
+   ```bash
+   az ad sp create-for-rbac --name "github-cards-against-covid" --role contributor \
+     --scopes /subscriptions/{subscription-id}/resourceGroups/rg-cards-against-covid \
+     --sdk-auth
+   ```
+
+2. Add the output as a secret named `AZURE_CREDENTIALS` in your GitHub repository.
+
+## Project Structure
+
+```
+.
+├── CardsAgainstHumanity.Api/          # Azure Functions backend
+├── CardsAgainstHumanity.Application/  # Shared business logic (multi-targeted .NET 6.0 & 8.0)
+├── CardsAgainstHumanity.UI/           # Blazor WebAssembly frontend
+├── infrastructure/                     # Bicep infrastructure templates
+│   ├── main.bicep                     # Main infrastructure template
+│   ├── parameters.json                # Environment parameters
+│   └── README.md                      # Infrastructure documentation
+└── .github/workflows/                 # GitHub Actions workflows
+    ├── pr-build.yml                   # PR validation workflow
+    └── release.yml                    # Deployment workflow
+```
+
+## Version Management
+
+Versions are now manually managed in project files (`.csproj`). Update the `<Version>`, `<AssemblyVersion>`, and `<FileVersion>` properties as needed.
+
+Current version: **1.0.0**
+
+## NuGet Package
+
+The `CardsAgainstHumanity.Application` library is packaged as a NuGet package with OpenTelemetry support for logging observability.
+
 ## How do I play
+
 These rules may be lightly adapted for me and my friend, as it was built for us and not you, so STFU.
 
 [http://stcardshumanity.z33.web.core.windows.net/](http://stcardshumanity.z33.web.core.windows.net/)
@@ -88,3 +198,7 @@ When the game is over the person with the most black card round wins is the cham
 Have a play and see what you think, I built this with it:
 
 [https://github.com/micklaw/Actor-Table-Entities](https://github.com/micklaw/Actor-Table-Entities)
+
+## License
+
+Free and open source as per Cards Against Humanity's terms and conditions.
