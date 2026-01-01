@@ -18,6 +18,7 @@ on:
 
 env:
   DOTNET_VERSION: '8.0.x'
+  NODE_VERSION: '20.x'
   AZURE_RESOURCE_GROUP: 'rg-cards-against-covid'
   AZURE_REGION: 'eastus'
 
@@ -33,6 +34,11 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
         
     - name: Restore dependencies
       run: dotnet restore
@@ -42,9 +48,14 @@ jobs:
       
     - name: Publish API
       run: dotnet publish CardsAgainstHumanity.Api/CardsAgainstHumanity.Api.csproj --configuration Release --output ./api-output
+    
+    - name: Install React dependencies
+      working-directory: ./CardsAgainstHumanity.Web
+      run: npm ci
       
-    - name: Publish UI
-      run: dotnet publish CardsAgainstHumanity.UI/CardsAgainstHumanity.UI.csproj --configuration Release --output ./ui-output
+    - name: Build React frontend
+      working-directory: ./CardsAgainstHumanity.Web
+      run: npm run build
       
     - name: Upload API artifact
       uses: actions/upload-artifact@v4
@@ -52,11 +63,11 @@ jobs:
         name: api-package
         path: ./api-output
         
-    - name: Upload UI artifact
+    - name: Upload frontend artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ui-package
-        path: ./ui-output/wwwroot
+        name: frontend-package
+        path: ./CardsAgainstHumanity.Web/dist
 
   deploy-infrastructure:
     runs-on: ubuntu-latest
@@ -126,11 +137,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Download UI artifact
+    - name: Download frontend artifact
       uses: actions/download-artifact@v4
       with:
-        name: ui-package
-        path: ./ui-package
+        name: frontend-package
+        path: ./frontend-package
         
     - name: Azure Login
       uses: azure/login@v2
@@ -142,8 +153,8 @@ jobs:
         az staticwebapp upload \
           --name ${{ needs.deploy-infrastructure.outputs.staticWebAppName }} \
           --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-          --app-location ./ui-package \
-          --output-location ./ui-package \
+          --app-location ./frontend-package \
+          --output-location ./frontend-package \
           --no-wait
           
     - name: Deployment Summary
