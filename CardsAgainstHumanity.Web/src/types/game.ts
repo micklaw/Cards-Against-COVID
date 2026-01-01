@@ -44,8 +44,11 @@ export interface ApiError {
   status: number;
 }
 
-export enum Tab {
-  Stats = 'stats',
-  Round = 'round',
-  Cards = 'cards'
-}
+export const Tab = {
+  Stats: 'stats',
+  Round: 'round',
+  Cards: 'cards'
+} as const;
+
+export type Tab = typeof Tab[keyof typeof Tab];
+

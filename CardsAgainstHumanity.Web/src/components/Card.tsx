@@ -1,9 +1,11 @@
 import React from 'react';
 
-export enum CardType {
-  Prompt = 'prompt',
-  Response = 'response'
-}
+export const CardType = {
+  Prompt: 'prompt',
+  Response: 'response'
+} as const;
+
+export type CardType = typeof CardType[keyof typeof CardType];
 
 interface CardProps {
   type: CardType;
