@@ -16,7 +16,7 @@ export function useLongPolling({
   enabled,
 }: UseLongPollingOptions) {
   const pollingRef = useRef<boolean>(false);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     if (!enabled || !gameUrl) {
@@ -36,7 +36,7 @@ export function useLongPolling({
         }
 
         // Continue polling
-        timeoutRef.current = setTimeout(() => {
+        timeoutRef.current = window.setTimeout(() => {
           pollingRef.current = false;
           poll();
         }, 100);
@@ -45,7 +45,7 @@ export function useLongPolling({
         
         // Retry with exponential backoff
         const retryDelay = Math.min(5000, 1000 * 2 ** Math.random());
-        timeoutRef.current = setTimeout(() => {
+        timeoutRef.current = window.setTimeout(() => {
           pollingRef.current = false;
           poll();
         }, retryDelay);

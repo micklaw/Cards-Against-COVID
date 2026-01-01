@@ -1,6 +1,7 @@
 // API client for backend communication
-import axios, { AxiosInstance } from 'axios';
-import { Game, PollingResponse } from '../types/game';
+import axios from 'axios';
+import type { AxiosInstance } from 'axios';
+import type { Game, PollingResponse } from '../types/game';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:7071/api';
 
