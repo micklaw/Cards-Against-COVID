@@ -14,7 +14,7 @@ namespace CardsAgainstHumanity.UI.State.Games.Effects
             this.apiClient = apiClient;
         }
 
-        protected override async Task HandleAsync(OpenGameAction action, IDispatcher dispatcher)
+        public override async Task HandleAsync(OpenGameAction action, IDispatcher dispatcher)
         {
             await this.apiClient.Open(action.InstanceName);
             await this.TryUpdateGame(action, dispatcher);

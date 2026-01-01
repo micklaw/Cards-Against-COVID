@@ -14,7 +14,7 @@ namespace CardsAgainstHumanity.UI.State.Games.Effects
             this.apiClient = apiClient;
         }
 
-        protected override async Task HandleAsync(NewRoundPromptAction action, IDispatcher dispatcher)
+        public override async Task HandleAsync(NewRoundPromptAction action, IDispatcher dispatcher)
         {
             await this.apiClient.NewPrompt(action.InstanceName);
             await this.TryUpdateGame(action, dispatcher);

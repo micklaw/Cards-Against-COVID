@@ -18,7 +18,7 @@ namespace CardsAgainstHumanity.UI.State.Games.Effects
             this.connectionState = connectionState;
         }
 
-        protected override async Task HandleAsync(ConnectToGameGroupAction action, IDispatcher dispatcher)
+        public override async Task HandleAsync(ConnectToGameGroupAction action, IDispatcher dispatcher)
         {
             if (connectionState.Value.Connected)
             {

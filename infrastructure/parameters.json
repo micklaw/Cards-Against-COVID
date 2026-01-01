@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "dev"
+    },
+    "baseName": {
+      "value": "cah"
+    },
+    "storageAccountSku": {
+      "value": "Standard_LRS"
+    },
+    "functionAppSku": {
+      "value": "Y1"
+    },
+    "functionAppSkuFamily": {
+      "value": "Y"
+    }
+  }
+}

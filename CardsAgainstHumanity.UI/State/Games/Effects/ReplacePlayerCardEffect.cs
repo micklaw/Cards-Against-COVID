@@ -15,7 +15,7 @@ namespace CardsAgainstHumanity.UI.State.Games.Effects
             this.apiClient = apiClient;
         }
 
-        protected override async Task HandleAsync(ReplacePlayerCardAction action, IDispatcher dispatcher)
+        public override async Task HandleAsync(ReplacePlayerCardAction action, IDispatcher dispatcher)
         {
             await this.apiClient.ReplaceCard(action.InstanceName, new ReplacePlayerCardRequest()
             {

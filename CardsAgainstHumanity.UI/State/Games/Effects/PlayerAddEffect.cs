@@ -21,7 +21,7 @@ namespace CardsAgainstHumanity.UI.State.Games.Effects
             this.localStorage = localStorage;
         }
 
-        protected override async Task HandleAsync(PlayerAddAction action, IDispatcher dispatcher)
+        public override async Task HandleAsync(PlayerAddAction action, IDispatcher dispatcher)
         {
             await this.apiClient.AddPlayer(action.InstanceName, new AddPlayerRequest()
             {

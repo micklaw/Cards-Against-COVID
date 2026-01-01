@@ -13,7 +13,7 @@ namespace CardsAgainstHumanity.UI.State.Games.Actions
             this.navigationManager = navigationManager;
         }
 
-        protected override Task HandleAsync(RedirectToGameAction action, IDispatcher dispatcher)
+        public override Task HandleAsync(RedirectToGameAction action, IDispatcher dispatcher)
         {
             if (!string.IsNullOrWhiteSpace(action.Instance))
             {
