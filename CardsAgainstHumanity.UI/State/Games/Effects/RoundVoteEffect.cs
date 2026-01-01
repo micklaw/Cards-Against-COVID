@@ -15,7 +15,7 @@ namespace CardsAgainstHumanity.UI.State.Games.Effects
             this.apiClient = apiClient;
         }
 
-        protected override async Task HandleAsync(RoundVoteAction action, IDispatcher dispatcher)
+        public override async Task HandleAsync(RoundVoteAction action, IDispatcher dispatcher)
         {
             await this.apiClient.Vote(action.InstanceName, new RoundVoteRequest()
             {

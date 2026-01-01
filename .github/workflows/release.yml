@@ -1,0 +1,155 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  AZURE_RESOURCE_GROUP: 'rg-cards-against-covid'
+  AZURE_REGION: 'eastus'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build solution
+      run: dotnet build --configuration Release --no-restore
+      
+    - name: Publish API
+      run: dotnet publish CardsAgainstHumanity.Api/CardsAgainstHumanity.Api.csproj --configuration Release --output ./api-output
+      
+    - name: Publish UI
+      run: dotnet publish CardsAgainstHumanity.UI/CardsAgainstHumanity.UI.csproj --configuration Release --output ./ui-output
+      
+    - name: Upload API artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: api-package
+        path: ./api-output
+        
+    - name: Upload UI artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ui-package
+        path: ./ui-output/wwwroot
+
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+    needs: build
+    outputs:
+      functionAppName: ${{ steps.deploy.outputs.functionAppName }}
+      staticWebAppName: ${{ steps.deploy.outputs.staticWebAppName }}
+      staticWebAppUrl: ${{ steps.deploy.outputs.staticWebAppUrl }}
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Create Resource Group
+      run: |
+        az group create \
+          --name ${{ env.AZURE_RESOURCE_GROUP }} \
+          --location ${{ env.AZURE_REGION }}
+      
+    - name: Deploy Bicep template
+      id: deploy
+      run: |
+        DEPLOYMENT_OUTPUT=$(az deployment group create \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+          --template-file infrastructure/main.bicep \
+          --parameters infrastructure/parameters.json \
+          --parameters environmentName=${{ github.event.inputs.environment || 'dev' }} \
+          --query 'properties.outputs' \
+          --output json)
+        
+        echo "functionAppName=$(echo $DEPLOYMENT_OUTPUT | jq -r '.functionAppName.value')" >> $GITHUB_OUTPUT
+        echo "staticWebAppName=$(echo $DEPLOYMENT_OUTPUT | jq -r '.staticWebAppName.value')" >> $GITHUB_OUTPUT
+        echo "staticWebAppUrl=$(echo $DEPLOYMENT_OUTPUT | jq -r '.staticWebAppUrl.value')" >> $GITHUB_OUTPUT
+
+  deploy-function-app:
+    runs-on: ubuntu-latest
+    needs: deploy-infrastructure
+    
+    steps:
+    - name: Download API artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: api-package
+        path: ./api-package
+        
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Deploy to Azure Functions
+      uses: Azure/functions-action@v1
+      with:
+        app-name: ${{ needs.deploy-infrastructure.outputs.functionAppName }}
+        package: ./api-package
+
+  deploy-static-web-app:
+    runs-on: ubuntu-latest
+    needs: deploy-infrastructure
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download UI artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ui-package
+        path: ./ui-package
+        
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Deploy to Static Web App
+      run: |
+        az staticwebapp upload \
+          --name ${{ needs.deploy-infrastructure.outputs.staticWebAppName }} \
+          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+          --app-location ./ui-package \
+          --output-location ./ui-package \
+          --no-wait
+          
+    - name: Deployment Summary
+      run: |
+        echo "## Deployment Complete! 🚀" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Static Web App URL**: ${{ needs.deploy-infrastructure.outputs.staticWebAppUrl }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Function App**: ${{ needs.deploy-infrastructure.outputs.functionAppName }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Environment**: ${{ github.event.inputs.environment || 'dev' }}" >> $GITHUB_STEP_SUMMARY

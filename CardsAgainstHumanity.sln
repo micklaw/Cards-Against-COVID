@@ -9,20 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardsAgainstHumanity.Api", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardsAgainstHumanity.UI", "CardsAgainstHumanity.UI\CardsAgainstHumanity.UI.csproj", "{4A876232-8C21-4E77-A0BB-570E4970D065}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{76A5CF87-848A-46F5-AAE0-F9FAB86E995A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{76A5CF87-848A-46F5-AAE0-F9FAB86E995A}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
 		NuGet.Config = NuGet.Config
 		README.md = README.md
-		version.json = version.json
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipeline", "Pipeline", "{72C0E8DA-ABFA-4EFD-9FA7-3A9C26CD8276}"
-	ProjectSection(SolutionItems) = preProject
-		azure-pipelines.yml = azure-pipelines.yml
-		Build\build.yml = Build\build.yml
-		Build\release.yml = Build\release.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{C37A3EB3-254A-47C2-9C6A-5A6B7581A716}"
@@ -64,9 +56,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{72C0E8DA-ABFA-4EFD-9FA7-3A9C26CD8276} = {76A5CF87-848A-46F5-AAE0-F9FAB86E995A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9B7EA341-4115-43E4-A750-59587FCA152A}
