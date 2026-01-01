@@ -21,32 +21,6 @@ var storageAccountName = '${baseName}storage${uniqueSuffix}'
 var functionAppName = '${baseName}-func-${environmentName}-${uniqueSuffix}'
 var appServicePlanName = '${baseName}-plan-${environmentName}-${uniqueSuffix}'
 var staticWebAppName = '${baseName}-swa-${environmentName}-${uniqueSuffix}'
-var applicationInsightsName = '${baseName}-ai-${environmentName}-${uniqueSuffix}'
-var logAnalyticsName = '${baseName}-la-${environmentName}-${uniqueSuffix}'
-
-// Log Analytics Workspace
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
-  name: logAnalyticsName
-  location: location
-  properties: {
-    sku: {
-      name: 'PerGB2018'
-    }
-    retentionInDays: 30
-  }
-}
-
-// Application Insights with OpenTelemetry support
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: applicationInsightsName
-  location: location
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-    WorkspaceResourceId: logAnalytics.id
-    IngestionMode: 'LogAnalytics'
-  }
-}
 
 // Storage Account
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
@@ -86,7 +60,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   }
 }
 
-// Function App with isolated worker model and OpenTelemetry
+// Function App with isolated worker model
 resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   name: functionAppName
   location: location
@@ -115,14 +89,6 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
           value: 'dotnet-isolated'
-        }
-        {
-          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: applicationInsights.properties.InstrumentationKey
-        }
-        {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: applicationInsights.properties.ConnectionString
         }
       ]
       cors: {
@@ -167,16 +133,6 @@ resource staticWebAppBackend 'Microsoft.Web/staticSites/linkedBackends@2023-12-0
   }
 }
 
-// Static Web App - Config for Application Insights
-resource staticWebAppConfig 'Microsoft.Web/staticSites/config@2023-12-01' = {
-  parent: staticWebApp
-  name: 'appsettings'
-  properties: {
-    APPINSIGHTS_INSTRUMENTATIONKEY: applicationInsights.properties.InstrumentationKey
-    APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString
-  }
-}
-
 // Outputs
 output storageAccountName string = storageAccount.name
 output storageAccountConnectionString string = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
@@ -185,5 +141,3 @@ output functionAppUrl string = 'https://${functionApp.properties.defaultHostName
 output staticWebAppName string = staticWebApp.name
 output staticWebAppUrl string = 'https://${staticWebApp.properties.defaultHostname}'
 output staticWebAppDeploymentToken string = staticWebApp.listSecrets().properties.apiKey
-output applicationInsightsInstrumentationKey string = applicationInsights.properties.InstrumentationKey
-output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString
