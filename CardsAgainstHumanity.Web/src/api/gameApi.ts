@@ -57,7 +57,7 @@ class GameApi {
   }
 
   // Submit response
-  async respond(gameUrl: string, playerId: number, responses: string[]): Promise<Game> {
+  async respond(gameUrl: string, playerId: number, responses: number[]): Promise<Game> {
     const response = await this.client.post<Game>(
       `/game/${gameUrl}/round/respond`,
       { playerId, responses }
@@ -80,6 +80,24 @@ class GameApi {
     return response.data;
   }
 
+  // Next round
+  async nextRound(gameUrl: string): Promise<Game> {
+    const response = await this.client.post<Game>(`/game/${gameUrl}/round/next`);
+    return response.data;
+  }
+
+  // Change prompt
+  async newPrompt(gameUrl: string): Promise<Game> {
+    const response = await this.client.post<Game>(`/game/${gameUrl}/round/prompt`);
+    return response.data;
+  }
+
+  // Open game
+  async openGame(gameUrl: string): Promise<Game> {
+    const response = await this.client.post<Game>(`/game/${gameUrl}/open`);
+    return response.data;
+  }
+
   // Close game
   async closeGame(gameUrl: string): Promise<Game> {
     const response = await this.client.post<Game>(`/game/${gameUrl}/close`);
@@ -89,6 +107,24 @@ class GameApi {
   // Finish game
   async finishGame(gameUrl: string): Promise<Game> {
     const response = await this.client.post<Game>(`/game/${gameUrl}/finish`);
+    return response.data;
+  }
+
+  // Replace a specific card
+  async replaceCard(gameUrl: string, playerId: number, cardIndex: number): Promise<Game> {
+    const response = await this.client.post<Game>(
+      `/game/${gameUrl}/player/replace`,
+      { playerId, cardIndex }
+    );
+    return response.data;
+  }
+
+  // Shuffle all cards
+  async shuffleCards(gameUrl: string, playerId: number): Promise<Game> {
+    const response = await this.client.post<Game>(
+      `/game/${gameUrl}/player/shuffle`,
+      { playerId }
+    );
     return response.data;
   }
 }
