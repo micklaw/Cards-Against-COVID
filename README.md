@@ -11,13 +11,14 @@ Why the fuck not?
 
 ## Technology Stack
 
-- **Frontend**: Blazor WebAssembly (.NET 8.0)
-- **Backend**: Azure Functions (.NET 6.0) with isolated backend
-- **State Management**: Fluxor (Redux pattern)
-- **Infrastructure**: Azure Static Web Apps + Azure Functions + Azure SignalR + Azure Table Storage
+- **Frontend**: React 19 + TypeScript with Vite
+- **Backend**: Azure Functions v4 (.NET 8.0) with Isolated Worker Model
+- **State Management**: Redux Toolkit
+- **Infrastructure**: Azure Static Web Apps + Azure Functions + Azure Table Storage
 - **Deployment**: GitHub Actions + Bicep IaC
-- **Real-time**: SignalR for live game updates
+- **Real-time**: Long Polling for state synchronization
 - **Observability**: Application Insights with OpenTelemetry support
+- **Local Development**: Azure Static Web Apps CLI
 
 ## Prerequisites
 
@@ -28,6 +29,14 @@ Why the fuck not?
 
 ## Local Development
 
+### Prerequisites
+
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Node.js 20.x+](https://nodejs.org/)
+- [Azure Functions Core Tools v4](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local)
+- [Azure Static Web Apps CLI](https://azure.github.io/static-web-apps-cli/) (installed as dev dependency)
+- Azure Storage Emulator (Azurite) or Azure Storage connection string
+
 ### Build the solution
 
 ```bash
@@ -35,21 +44,44 @@ dotnet restore
 dotnet build --configuration Release
 ```
 
-### Run locally
+### Run locally with Azure Static Web Apps CLI
 
-You'll need to set up local Azure Storage emulator or use Azure Storage connection string.
+The Azure Static Web Apps CLI provides local development with automatic API routing without CORS issues.
 
-1. **Start the API (Azure Functions)**:
+1. **Set up local.settings.json for Azure Functions**:
+   ```bash
+   cd CardsAgainstHumanity.Api
+   cp local.settings.json.example local.settings.json
+   # Edit local.settings.json with your storage connection strings
+   ```
+
+2. **Option 1 - Use SWA CLI (Recommended)**:
+   
+   This will start both the React app and Azure Functions together with proper routing:
+   ```bash
+   cd CardsAgainstHumanity.Web
+   npm install
+   npm start
+   ```
+   
+   The app will be available at `http://localhost:4280` with API automatically routed through `/api/*`.
+
+3. **Option 2 - Run separately (for debugging)**:
+   
+   **Terminal 1 - Start the API (Azure Functions)**:
    ```bash
    cd CardsAgainstHumanity.Api
    func start
    ```
-
-2. **Start the UI (Blazor WebAssembly)**:
+   
+   **Terminal 2 - Start the React app**:
    ```bash
-   cd CardsAgainstHumanity.UI
-   dotnet run
+   cd CardsAgainstHumanity.Web
+   npm install
+   npm run dev
    ```
+   
+   The React app will be available at `http://localhost:5173` and will connect to the API at `http://localhost:7071/api`.
 
 ## Deployment
 
@@ -97,16 +129,21 @@ Deployment is automated via GitHub Actions:
 
 ```
 .
-├── CardsAgainstHumanity.Api/          # Azure Functions backend
-├── CardsAgainstHumanity.Application/  # Shared business logic (multi-targeted .NET 6.0 & 8.0)
-├── CardsAgainstHumanity.UI/           # Blazor WebAssembly frontend
+├── CardsAgainstHumanity.Api/          # Azure Functions backend (.NET 8.0)
+├── CardsAgainstHumanity.Application/  # Shared business logic (.NET 8.0)
+├── CardsAgainstHumanity.Web/          # React + TypeScript frontend
+│   ├── src/                           # React components and logic
+│   ├── staticwebapp.config.json       # Static Web App routing config
+│   └── swa-cli.config.json            # SWA CLI local development config
+├── CardsAgainstHumanity.UI/           # (Legacy Blazor WebAssembly frontend)
 ├── infrastructure/                     # Bicep infrastructure templates
 │   ├── main.bicep                     # Main infrastructure template
 │   ├── parameters.json                # Environment parameters
 │   └── README.md                      # Infrastructure documentation
 └── .github/workflows/                 # GitHub Actions workflows
     ├── pr-build.yml                   # PR validation workflow
-    └── release.yml                    # Deployment workflow
+    ├── release.yml                    # Deployment workflow (dev/staging)
+    └── tag-release.yml                # Production deployment workflow
 ```
 
 ## Version Management
