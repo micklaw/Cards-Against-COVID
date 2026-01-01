@@ -67,7 +67,7 @@ const GameTabs: React.FC = () => {
 
       <main role="main" className="inner cover">
         {tabs.map(tab => (
-          <GameTab key={tab.tab} tab={tab.tab} className={tab.active ? '' : 'd-none'}>
+          <GameTab key={tab.tab} className={tab.active ? '' : 'd-none'}>
             {tab.tab === Tab.Stats && <StatsTab />}
             {tab.tab === Tab.Round && <RoundTab />}
             {tab.tab === Tab.Cards && <CardsTab />}
