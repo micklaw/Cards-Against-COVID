@@ -38,9 +38,6 @@ jobs:
     - name: Publish API
       run: dotnet publish CardsAgainstHumanity.Api/CardsAgainstHumanity.Api.csproj --configuration Release --output ./api-output --no-build
       
-    - name: Publish Blazor UI
-      run: dotnet publish CardsAgainstHumanity.UI/CardsAgainstHumanity.UI.csproj --configuration Release --output ./ui-output --no-build
-      
     - name: Install React dependencies
       working-directory: ./CardsAgainstHumanity.Web
       run: npm ci

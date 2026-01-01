@@ -135,7 +135,6 @@ Deployment is automated via GitHub Actions:
 │   ├── src/                           # React components and logic
 │   ├── staticwebapp.config.json       # Static Web App routing config
 │   └── swa-cli.config.json            # SWA CLI local development config
-├── CardsAgainstHumanity.UI/           # (Legacy Blazor WebAssembly frontend)
 ├── infrastructure/                     # Bicep infrastructure templates
 │   ├── main.bicep                     # Main infrastructure template
 │   ├── parameters.json                # Environment parameters
