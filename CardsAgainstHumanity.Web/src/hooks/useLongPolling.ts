@@ -1,22 +1,22 @@
 // Long polling hook for real-time updates
 import { useEffect, useRef } from 'react';
 import { gameApi } from '../api/gameApi';
+import type { Game } from '../types/game';
 
-interface UseLongPollingOptions {
-  gameUrl: string | null;
-  currentVersion: number;
-  onUpdate: () => void;
-  enabled: boolean;
-}
-
-export function useLongPolling({
-  gameUrl,
-  currentVersion,
-  onUpdate,
-  enabled,
-}: UseLongPollingOptions) {
+export function useLongPolling(
+  gameUrl: string,
+  currentVersion: number,
+  onUpdate: (game: Game) => void,
+  enabled: boolean
+) {
   const pollingRef = useRef<boolean>(false);
   const timeoutRef = useRef<number | undefined>(undefined);
+  const versionRef = useRef(currentVersion);
+
+  // Update version ref when it changes
+  useEffect(() => {
+    versionRef.current = currentVersion;
+  }, [currentVersion]);
 
   useEffect(() => {
     if (!enabled || !gameUrl) {
@@ -29,10 +29,12 @@ export function useLongPolling({
       pollingRef.current = true;
 
       try {
-        const result = await gameApi.poll(gameUrl, currentVersion);
+        const result = await gameApi.poll(gameUrl, versionRef.current);
         
         if (result.hasUpdate) {
-          onUpdate();
+          // Fetch the updated game state
+          const updatedGame = await gameApi.getGame(gameUrl);
+          onUpdate(updatedGame);
         }
 
         // Continue polling
@@ -60,5 +62,5 @@ export function useLongPolling({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [gameUrl, currentVersion, onUpdate, enabled]);
+  }, [gameUrl, enabled, onUpdate]);
 }

@@ -3,13 +3,20 @@ export interface Player {
   id: number;
   name: string;
   cards: string[];
-  score: number;
+}
+
+export interface Response {
+  playerId: number;
+  responses: number[]; // Indices of cards in player's hand
 }
 
 export interface Round {
   prompt: string;
-  responses: Record<number, string[]>;
-  isRevealed: boolean;
+  responses: Response[];
+  voted: number[];
+  votes: number[];
+  hasResponses: boolean;
+  isWon: boolean;
   wonBy: number;
 }
 
@@ -24,6 +31,7 @@ export interface Game {
   previousRounds: Round[];
   isOpen: boolean;
   isOver: boolean;
+  score: Record<number, number>;
 }
 
 export interface PollingResponse {
@@ -34,4 +42,10 @@ export interface PollingResponse {
 export interface ApiError {
   message: string;
   status: number;
+}
+
+export enum Tab {
+  Stats = 'stats',
+  Round = 'round',
+  Cards = 'cards'
 }
