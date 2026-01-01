@@ -30,17 +30,15 @@ This document summarizes the comprehensive migration of Cards Against COVID from
    - Modified `IVersionable` interface to use `int Version` instead of `string ETag`
    - Added `IncrementVersion()` calls to all state-changing operations
    - Version is returned with every API response for client synchronization
-
-5. **OpenTelemetry Integration**
-   - Added OpenTelemetry packages for distributed tracing
-   - Configured `ActivitySource` for custom spans
-   - Integrated with Application Insights for cloud telemetry
-   - Added trace logging to all function endpoints
-
-6. **ActorTableEntities Configuration**
    - Kept version 0.1.0-alpha000 (v2.0.0 API not compatible)
    - Maintained existing actor-based concurrency pattern
    - Works with isolated worker model through constructor injection
+
+6. **Cost Optimization (2026-01-01)**
+   - Removed Application Insights to eliminate monitoring costs
+   - Removed Log Analytics Workspace to eliminate storage costs
+   - Removed OpenTelemetry instrumentation (backend and frontend)
+   - Kept basic console logging for essential debugging
 
 ### ✅ Frontend Foundation (React + TypeScript)
 
@@ -65,18 +63,12 @@ This document summarizes the comprehensive migration of Cards Against COVID from
    - Manages version tracking and update callbacks
    - Handles connection lifecycle and cleanup
 
-5. **OpenTelemetry Browser Instrumentation**
-   - Created `telemetry.ts` with Web SDK configuration
-   - Auto-instruments fetch and XHR requests
-   - Configured Application Insights export
-   - Enables end-to-end distributed tracing
-
 ### ✅ Infrastructure Updates
 
 1. **Bicep Templates**
    - **Removed:** SignalR Service resource
    - **Removed:** SignalR connection string from Function App settings
-   - **Added:** Enhanced Application Insights configuration with OpenTelemetry
+   - **Removed:** Application Insights and Log Analytics (2026-01-01 cost optimization)
    - **Updated:** Function App to use `DOTNET-ISOLATED|8.0` runtime
    - **Updated:** Static Web App output location to `dist` (React/Vite)
    - **Updated:** Function App worker runtime to `dotnet-isolated`
@@ -125,7 +117,9 @@ This document summarizes the comprehensive migration of Cards Against COVID from
 
 1. **Cost Reduction**
    - Eliminated Azure SignalR Service ($49-490/month)
+   - Eliminated Application Insights and Log Analytics (2026-01-01)
    - Long polling uses existing Function App infrastructure
+   - Runs on free tier resources (Consumption Function App + Free Static Web App)
 
 2. **Simpler Architecture**
    - Removed complex SignalR connection management
@@ -143,12 +137,7 @@ This document summarizes the comprehensive migration of Cards Against COVID from
    - TypeScript for type safety
    - More flexible component model
 
-5. **Enhanced Observability**
-   - End-to-end tracing with OpenTelemetry
-   - Better insights into user interactions
-   - Distributed trace correlation
-
-6. **Production-Ready CI/CD**
+5. **Production-Ready CI/CD**
    - Tag-based releases for semantic versioning
    - Automated infrastructure deployment
    - Separate environments (dev/prod)
@@ -172,7 +161,6 @@ This document summarizes the comprehensive migration of Cards Against COVID from
 - `CardsAgainstHumanity.Web/src/api/gameApi.ts` - API client
 - `CardsAgainstHumanity.Web/src/hooks/useLongPolling.ts` - Long polling hook
 - `CardsAgainstHumanity.Web/src/types/game.ts` - TypeScript definitions
-- `CardsAgainstHumanity.Web/src/telemetry/telemetry.ts` - OpenTelemetry setup
 
 ### Infrastructure
 - `infrastructure/main.bicep` - Removed SignalR, updated for isolated worker
@@ -260,8 +248,8 @@ git push origin v1.0.0
 
 - ActorTableEntities v2.0.0 exists but has incompatible API, staying with v0.1.0-alpha000
 - Long polling timeout is 30 seconds, clients should reconnect immediately
-- OpenTelemetry requires environment variable `VITE_APPINSIGHTS_KEY` in frontend
 - Backend builds successfully with only nullable reference warnings (expected)
+- Application Insights and OpenTelemetry removed on 2026-01-01 for cost optimization
 
 ## Author
 
