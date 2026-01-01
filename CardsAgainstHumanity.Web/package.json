@@ -12,15 +12,6 @@
     "start:swa": "swa start dist --api-location ../CardsAgainstHumanity.Api"
   },
   "dependencies": {
-    "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/context-zone": "^2.2.0",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
-    "@opentelemetry/instrumentation-fetch": "^0.208.0",
-    "@opentelemetry/instrumentation-xml-http-request": "^0.208.0",
-    "@opentelemetry/resources": "^2.2.0",
-    "@opentelemetry/sdk-trace-base": "^2.2.0",
-    "@opentelemetry/sdk-trace-web": "^2.2.0",
-    "@opentelemetry/semantic-conventions": "^1.38.0",
     "@reduxjs/toolkit": "^2.11.2",
     "axios": "^1.13.2",
     "react": "^19.2.0",
@@ -31,7 +22,6 @@
   "devDependencies": {
     "@azure/static-web-apps-cli": "^2.0.7",
     "@eslint/js": "^9.39.1",
-    "@opentelemetry/auto-instrumentations-web": "^0.54.0",
     "@types/node": "^24.10.4",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
