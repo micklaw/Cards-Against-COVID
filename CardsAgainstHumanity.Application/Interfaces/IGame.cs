@@ -17,7 +17,7 @@ namespace CardsAgainstHumanity.Application.Interfaces
 
         IList<Player> Players { get; set; }
 
-        Round CurrentRound { get; set; }
+        Round? CurrentRound { get; set; }
 
         IList<Round> PreviousRounds { get; set; }
 

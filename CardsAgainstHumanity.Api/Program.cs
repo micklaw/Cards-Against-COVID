@@ -8,7 +8,6 @@ using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
-using Microsoft.Extensions.Configuration;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
@@ -33,11 +32,6 @@ var host = new HostBuilder()
         services.AddSingleton<ICardService, CardService>();
         services.AddSingleton<IGameStateService, GameStateService>();
         services.AddSingleton<IPollingService, PollingService>();
-        
-        // Configure ActorTableEntity client for v2
-        var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage") ?? "UseDevelopmentStorage=true";
-        services.AddSingleton(new TableServiceClient(connectionString));
-        services.AddActorTableEntityClient();
     })
     .Build();
 

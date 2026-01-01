@@ -36,7 +36,7 @@ namespace CardsAgainstHumanity.Api.Entities
         public IList<Player> Players { get; set; } = new List<Player>();
 
         [ActorTableEntityComplexProperty]
-        public Round CurrentRound { get; set; }
+        public Round? CurrentRound { get; set; }
 
         [ActorTableEntityComplexProperty]
         public IList<Round> PreviousRounds { get; set; } = new List<Round>();
