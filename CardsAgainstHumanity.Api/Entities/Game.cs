@@ -22,19 +22,21 @@ namespace CardsAgainstHumanity.Api.Entities
 
         }
 
-        public string Url { get; set; }
+        public string Url { get; set; } = string.Empty;
 
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
-        public string Code { get; set; }
+        public string Code { get; set; } = string.Empty;
 
         public int CardCount { get; set; } = 7;
+
+        public int Version { get; set; } = 0;
 
         [ActorTableEntityComplexProperty]
         public IList<Player> Players { get; set; } = new List<Player>();
 
         [ActorTableEntityComplexProperty]
-        public Round CurrentRound { get; set; }
+        public Round? CurrentRound { get; set; }
 
         [ActorTableEntityComplexProperty]
         public IList<Round> PreviousRounds { get; set; } = new List<Round>();
@@ -50,6 +52,7 @@ namespace CardsAgainstHumanity.Api.Entities
                 Url = name.Slugify();
                 Name = name;
                 Code = RandomX.Get().ToString();
+                IncrementVersion();
             }
 
             return this;
@@ -58,24 +61,28 @@ namespace CardsAgainstHumanity.Api.Entities
         public Game Open()
         {
             IsOpen = true;
+            IncrementVersion();
             return this;
         }
 
         public Game Close()
         {
             IsOpen = false;
+            IncrementVersion();
             return this;
         }
 
         public Game Finish()
         {
             IsOver = true;
+            IncrementVersion();
             return this;
         }
 
         public Game RevealRound()
         {
             CurrentRound?.Reveal();
+            IncrementVersion();
             return this;
         }
 
@@ -93,6 +100,7 @@ namespace CardsAgainstHumanity.Api.Entities
             };
 
             Players.Add(player);
+            IncrementVersion();
             return this;
         }
 
@@ -102,6 +110,7 @@ namespace CardsAgainstHumanity.Api.Entities
             {
                 Prompt = prompt
             };
+            IncrementVersion();
 
             return this;
         }
@@ -126,12 +135,14 @@ namespace CardsAgainstHumanity.Api.Entities
         public Game Vote(VoteModel model)
         {
             CurrentRound?.Vote(model.PlayerId, model.VoteeId);
+            IncrementVersion();
             return this;
         }
 
         public Game NewPrompt(string prompt)
         {
             CurrentRound?.NewPrompt(prompt);
+            IncrementVersion();
             return this;
         }
 
@@ -139,6 +150,7 @@ namespace CardsAgainstHumanity.Api.Entities
         {
             Player player = Players.First(i => i.Id == model.PlayerId);
             player.Shuffle(model.Responses);
+            IncrementVersion();
             return this;
         }
 
@@ -146,18 +158,27 @@ namespace CardsAgainstHumanity.Api.Entities
         {
             Player player = Players.First(i => i.Id == model.PlayerId);
             player.Replace(model.CardIndex, model.Response);
+            IncrementVersion();
             return this;
         }
 
         public Game Respond(RespondModel model)
         {
             CurrentRound?.Respond(model.PlayerId, model.Responses);
+            IncrementVersion();
             return this;
         }
+        
         public Game ResetResponse(ResetResponseRequest model)
         {
             CurrentRound?.ResetResponse(model.PlayerId);
+            IncrementVersion();
             return this;
+        }
+
+        private void IncrementVersion()
+        {
+            Version++;
         }
     }
 }

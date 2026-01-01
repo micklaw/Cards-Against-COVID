@@ -1,14 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AzureFunctionsVersion>v3</AzureFunctionsVersion>
+    <TargetFramework>net8.0</TargetFramework>
+    <AzureFunctionsVersion>v4</AzureFunctionsVersion>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ActorTableEntities" Version="0.1.0-alpha000" />
-    <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.10" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.SignalRService" Version="1.1.0" />
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.6" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.24.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.18.1" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.2.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage" Version="6.6.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="1.4.0" />
+    <PackageReference Include="OpenTelemetry" Version="1.11.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.11.0" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.11.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.10.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.10.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CardsAgainstHumanity.Application\CardsAgainstHumanity.Application.csproj" />

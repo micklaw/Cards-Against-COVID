@@ -14,7 +14,7 @@ namespace CardsAgainstHumanity.UI.State.Games.Effects
             this.localStorage = localStorage;
         }
 
-        protected override async Task HandleAsync(UpdateGameStateAction action, IDispatcher dispatcher)
+        public override async Task HandleAsync(UpdateGameStateAction action, IDispatcher dispatcher)
         {
             var currentPlayerId = await this.localStorage.GetItemAsync<int>(action.Game.Url);
 

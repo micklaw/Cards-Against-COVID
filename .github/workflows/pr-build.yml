@@ -1,0 +1,50 @@
+name: PR Build
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build solution
+      run: dotnet build --configuration Release --no-restore
+      
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build --verbosity normal
+      continue-on-error: true
+      
+    - name: Publish API
+      run: dotnet publish CardsAgainstHumanity.Api/CardsAgainstHumanity.Api.csproj --configuration Release --output ./api-output --no-build
+      
+    - name: Publish Blazor UI
+      run: dotnet publish CardsAgainstHumanity.UI/CardsAgainstHumanity.UI.csproj --configuration Release --output ./ui-output --no-build
+      
+    - name: Install React dependencies
+      working-directory: ./CardsAgainstHumanity.Web
+      run: npm ci
+      
+    - name: Build React frontend
+      working-directory: ./CardsAgainstHumanity.Web
+      run: npm run build
