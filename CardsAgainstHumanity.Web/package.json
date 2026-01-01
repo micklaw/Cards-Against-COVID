@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && npm run copy-config",
-    "copy-config": "cp staticwebapp.config.json dist/",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "swa start --config swa-cli.config.json",

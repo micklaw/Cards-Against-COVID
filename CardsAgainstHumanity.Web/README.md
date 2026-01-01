@@ -41,15 +41,15 @@ npm run build
 This will:
 1. Type-check with TypeScript
 2. Build the app with Vite
-3. Copy the `staticwebapp.config.json` to the `dist` folder
+3. Automatically copy all files from `public/` (including `staticwebapp.config.json`) to the `dist` folder
 
 The output will be in the `dist` folder.
 
 ## Configuration Files
 
-### `staticwebapp.config.json`
+### `public/staticwebapp.config.json`
 
-This file configures Azure Static Web Apps routing in production:
+This file configures Azure Static Web Apps routing in production and is automatically copied to the build output:
 - Routes all `/api/*` requests to the Azure Functions backend
 - Allows anonymous access to API endpoints
 - Sets up CORS headers

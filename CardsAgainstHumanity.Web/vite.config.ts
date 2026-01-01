@@ -6,11 +6,6 @@ export default defineConfig({
   plugins: [react()],
   publicDir: 'public',
   build: {
-    outDir: 'dist',
-    rollupOptions: {
-      output: {
-        manualChunks: undefined
-      }
-    }
+    outDir: 'dist'
   }
 })
