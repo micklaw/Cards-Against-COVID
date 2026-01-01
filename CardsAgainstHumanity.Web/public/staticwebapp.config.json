@@ -10,7 +10,7 @@
     }
   ],
   "globalHeaders": {
-    "comment": "CORS configured for anonymous access as per project requirements. Consider restricting in production if needed.",
+    "_comment": "IMPORTANT: CORS configured with wildcard (*) as per project requirements for development convenience. Azure Static Web Apps handles CORS internally in production. If stricter security is needed, configure specific allowed origins in Azure portal.",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
