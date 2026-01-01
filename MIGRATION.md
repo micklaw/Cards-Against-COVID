@@ -30,9 +30,14 @@ This document summarizes the comprehensive migration of Cards Against COVID from
    - Modified `IVersionable` interface to use `int Version` instead of `string ETag`
    - Added `IncrementVersion()` calls to all state-changing operations
    - Version is returned with every API response for client synchronization
-   - Kept version 0.1.0-alpha000 (v2.0.0 API not compatible)
-   - Maintained existing actor-based concurrency pattern
-   - Works with isolated worker model through constructor injection
+
+5. **ActorTableEntities Upgrade (2026-01-01)**
+   - ✅ Upgraded from v0.1.0-alpha000 to v2.0.0 (stable release)
+   - ✅ Added proper configuration in Program.cs with AddActorTableEntities
+   - ✅ Code already compatible with v2 API (GetLocked/Flush pattern)
+   - ✅ Maintained existing actor-based concurrency pattern
+   - ✅ Works with isolated worker model through constructor injection
+   - ✅ Now uses stable release with Azure SDK v12 support
 
 6. **Cost Optimization (2026-01-01)**
    - Removed Application Insights to eliminate monitoring costs
@@ -246,7 +251,7 @@ git push origin v1.0.0
 
 ## Notes
 
-- ActorTableEntities v2.0.0 exists but has incompatible API, staying with v0.1.0-alpha000
+- ActorTableEntities upgraded to v2.0.0 (2026-01-01) - now using stable release with Azure SDK v12
 - Long polling timeout is 30 seconds, clients should reconnect immediately
 - Backend builds successfully with only nullable reference warnings (expected)
 - Application Insights and OpenTelemetry removed on 2026-01-01 for cost optimization

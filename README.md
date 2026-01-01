@@ -17,7 +17,7 @@ Why the fuck not?
 - **Infrastructure**: Azure Static Web Apps + Azure Functions + Azure Table Storage
 - **Deployment**: GitHub Actions + Bicep IaC
 - **Real-time**: Long Polling for state synchronization
-- **Observability**: Application Insights with OpenTelemetry support
+- **Storage**: ActorTableEntities v2.0.0 for actor-based table storage with blob locking
 - **Local Development**: Azure Static Web Apps CLI
 
 ## Prerequisites
@@ -154,7 +154,7 @@ Current version: **1.0.0**
 
 ## NuGet Package
 
-The `CardsAgainstHumanity.Application` library is packaged as a NuGet package with OpenTelemetry support for logging observability.
+The `CardsAgainstHumanity.Application` library contains shared business logic and is used by both the API and frontend projects.
 
 ## How do I play
 
@@ -232,9 +232,16 @@ When the game is over the person with the most black card round wins is the cham
 
 ### Azure Function Actor Table Entities
 
-Have a play and see what you think, I built this with it:
+This project uses ActorTableEntities v2.0.0, a lightweight actor-based locking mechanism for Azure Table Storage:
 
 [https://github.com/micklaw/Actor-Table-Entities](https://github.com/micklaw/Actor-Table-Entities)
+
+ActorTableEntities provides:
+- Quick response times (no queuing overhead)
+- Actor-based concurrency control with blob locking
+- Simple API for entity operations
+- Support for .NET 8 and Azure Functions v4 isolated worker model
+- Cost-effective alternative to Durable Entities for low-to-medium scale scenarios
 
 ## License
 
