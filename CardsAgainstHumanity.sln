@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardsAgainstHumanity.Applic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardsAgainstHumanity.Api", "CardsAgainstHumanity.Api\CardsAgainstHumanity.Api.csproj", "{D8FC4973-8B14-4028-B9B3-13EC62D60FFA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardsAgainstHumanity.UI", "CardsAgainstHumanity.UI\CardsAgainstHumanity.UI.csproj", "{4A876232-8C21-4E77-A0BB-570E4970D065}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{76A5CF87-848A-46F5-AAE0-F9FAB86E995A}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
@@ -49,10 +47,6 @@ Global
 		{D8FC4973-8B14-4028-B9B3-13EC62D60FFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8FC4973-8B14-4028-B9B3-13EC62D60FFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8FC4973-8B14-4028-B9B3-13EC62D60FFA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4A876232-8C21-4E77-A0BB-570E4970D065}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A876232-8C21-4E77-A0BB-570E4970D065}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A876232-8C21-4E77-A0BB-570E4970D065}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A876232-8C21-4E77-A0BB-570E4970D065}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

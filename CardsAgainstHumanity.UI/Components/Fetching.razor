@@ -1,9 +1,0 @@
-﻿@inherits FluxorComponent
-@inject IState<GameState> GameState
-
-@if (GameState.Value.Fetching)
-{
-    <div class="refreshing">
-        <span class="badge badge-info">refreshing</span>
-    </div>
-}
