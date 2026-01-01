@@ -3,8 +3,21 @@
   "logging": {
     "applicationInsights": {
       "samplingSettings": {
-        "isEnabled": true
+        "isEnabled": true,
+        "maxTelemetryItemsPerSecond": 20
       }
+    },
+    "logLevel": {
+      "default": "Information",
+      "Function": "Information",
+      "Host.Results": "Information",
+      "Microsoft": "Warning"
+    }
+  },
+  "functionTimeout": "00:05:00",
+  "extensions": {
+    "http": {
+      "routePrefix": "api"
     }
   }
 }
