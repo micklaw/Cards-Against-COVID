@@ -1,221 +1,284 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using System.Net;
 using ActorTableEntities;
 using CardsAgainstHumanity.Api.Entities;
 using CardsAgainstHumanity.Api.Extensions;
+using CardsAgainstHumanity.Api.Services;
+using CardsAgainstHumanity.Application.Extensions;
 using CardsAgainstHumanity.Application.Models.Api;
 using CardsAgainstHumanity.Application.Models.Requests;
 using CardsAgainstHumanity.Application.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Extensions.SignalRService;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Extensions.Logging;
 
-namespace CardsAgainstHumanity.Api
+namespace CardsAgainstHumanity.Api;
+
+public class FunctionTriggers
 {
-    public class FunctionTriggers : FunctionBase
+    public const string RoutePrefix = "game/{instance}";
+
+    private readonly ICardService _cardService;
+    private readonly IActorTableEntityClient _entityClient;
+    private readonly IGameStateService _gameStateService;
+    private readonly IPollingService _pollingService;
+    private readonly ILogger<FunctionTriggers> _logger;
+    private static readonly ActivitySource ActivitySource = new("CardsAgainstHumanity.Api");
+
+    public FunctionTriggers(
+        ICardService cardService,
+        IActorTableEntityClient entityClient,
+        IGameStateService gameStateService,
+        IPollingService pollingService,
+        ILogger<FunctionTriggers> logger)
     {
-        public const string RoutePrefix = "game/{instance}";
+        _cardService = cardService;
+        _entityClient = entityClient;
+        _gameStateService = gameStateService;
+        _pollingService = pollingService;
+        _logger = logger;
+    }
 
-        private readonly ICardService cardService;
+    [Function(nameof(ReadStateTrigger))]
+    public async Task<HttpResponseData> ReadStateTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = RoutePrefix + "/read")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("ReadState");
+        var name = req.GetRouteValue("instance");
 
-        public FunctionTriggers(ICardService cardService)
+        _logger.LogInformation("Reading game state for: {GameName}", name);
+
+        var game = await _entityClient.Get<Game>("game", name);
+
+        if (game == null)
         {
-            this.cardService = cardService;
+            return req.CreateResponse(HttpStatusCode.NotFound);
         }
 
-        [FunctionName(nameof(ReadStateTrigger))]
-        public async Task<IActionResult> ReadStateTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = RoutePrefix + "/read")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient)
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(game);
+        return response;
+    }
+
+    [Function(nameof(PollTrigger))]
+    public async Task<HttpResponseData> PollTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = RoutePrefix + "/poll")] HttpRequestData req,
+        CancellationToken cancellationToken)
+    {
+        using var activity = ActivitySource.StartActivity("Poll");
+        var name = req.GetRouteValue("instance");
+        var versionStr = req.Query["version"];
+        
+        if (!int.TryParse(versionStr, out var currentVersion))
         {
-            var name = req.RouteValues["instance"].ToString();
-
-            var game = await entityClient.Get<Game>("game", name);
-
-            if (game == null)
-            {
-                return new NotFoundResult();
-            }
-
-            return new OkObjectResult(game);
+            currentVersion = 0;
         }
 
-        [FunctionName(nameof(CreateTrigger))]
-        public async Task<IActionResult> CreateTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix)] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var name = await req.BodyParam<string>("name");
+        _logger.LogInformation("Polling for game: {GameName}, current version: {Version}", name, currentVersion);
 
-            return await entityClient.Orchestrate(name, signalRMessages, game => { game.Create(name); });
-        }
+        var result = await _pollingService.Poll(name!, currentVersion, cancellationToken);
 
-        [FunctionName(nameof(OpenTrigger))]
-        public async Task<IActionResult> OpenTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/open")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var instance = req.RouteValues["instance"].ToString();
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
+        return response;
+    }
 
-            return await entityClient.Orchestrate(instance, signalRMessages, game => game.Open());
-        }
+    [Function(nameof(CreateTrigger))]
+    public async Task<HttpResponseData> CreateTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix)] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("CreateGame");
+        var name = await req.ReadBodyParamAsync<string>("name");
 
-        [FunctionName(nameof(CloseTrigger))]
-        public async Task<IActionResult> CloseTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/close")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var instance = req.RouteValues["instance"].ToString();
+        _logger.LogInformation("Creating game: {GameName}", name);
 
-            return await entityClient.Orchestrate(instance, signalRMessages, game => game.Close());
-        }
+        return await Orchestrate(req, name!, game => game.Create(name!));
+    }
 
-        [FunctionName(nameof(FinishTrigger))]
-        public async Task<IActionResult> FinishTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/finish")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var instance = req.RouteValues["instance"].ToString();
+    [Function(nameof(OpenTrigger))]
+    public async Task<HttpResponseData> OpenTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/open")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("OpenGame");
+        var instance = req.GetRouteValue("instance");
 
-            return await entityClient.Orchestrate(instance, signalRMessages, game => game.Finish());
-        }
+        _logger.LogInformation("Opening game: {GameName}", instance);
 
-        [FunctionName(nameof(RevealTrigger))]
-        public async Task<IActionResult> RevealTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/reveal")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var instance = req.RouteValues["instance"].ToString();
+        return await Orchestrate(req, instance!, game => game.Open());
+    }
 
-            return await entityClient.Orchestrate(instance, signalRMessages, game => game.RevealRound());
-        }
+    [Function(nameof(CloseTrigger))]
+    public async Task<HttpResponseData> CloseTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/close")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("CloseGame");
+        var instance = req.GetRouteValue("instance");
 
-        [FunctionName(nameof(AddPlayerTrigger))]
-        public async Task<IActionResult> AddPlayerTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/add")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var model = await req.Body<AddPlayerModel>();
-            model.Responses = this.cardService.ShuffleResponses();
+        _logger.LogInformation("Closing game: {GameName}", instance);
 
-            var instance = req.RouteValues["instance"].ToString();
+        return await Orchestrate(req, instance!, game => game.Close());
+    }
 
-            return await entityClient.Orchestrate(instance, signalRMessages, game => game.AddPlayer(model));
-        }
+    [Function(nameof(FinishTrigger))]
+    public async Task<HttpResponseData> FinishTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/finish")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("FinishGame");
+        var instance = req.GetRouteValue("instance");
 
-        [FunctionName(nameof(NextRoundTrigger))]
-        public async Task<IActionResult> NextRoundTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/next")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var prompt = this.cardService.GetPrompt();
+        _logger.LogInformation("Finishing game: {GameName}", instance);
 
-            var instance = req.RouteValues["instance"].ToString();
+        return await Orchestrate(req, instance!, game => game.Finish());
+    }
 
-            return await entityClient.Orchestrate(instance, signalRMessages, game => game.NextRound(prompt));
-        }
+    [Function(nameof(RevealTrigger))]
+    public async Task<HttpResponseData> RevealTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/reveal")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("RevealRound");
+        var instance = req.GetRouteValue("instance");
 
-        [FunctionName(nameof(NewRoundTrigger))]
-        public async Task<IActionResult> NewRoundTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/new")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var prompt = this.cardService.GetPrompt();
+        _logger.LogInformation("Revealing round for game: {GameName}", instance);
 
-            var instance = req.RouteValues["instance"].ToString();
+        return await Orchestrate(req, instance!, game => game.RevealRound());
+    }
 
-            return await entityClient.Orchestrate(instance, signalRMessages, game => game.NewRound(prompt));
-        }
+    [Function(nameof(AddPlayerTrigger))]
+    public async Task<HttpResponseData> AddPlayerTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/add")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("AddPlayer");
+        var model = await req.ReadBodyAsync<AddPlayerModel>();
+        model!.Responses = _cardService.ShuffleResponses();
 
-        [FunctionName(nameof(VoteTrigger))]
-        public async Task<IActionResult> VoteTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/vote")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var model = await req.Body<VoteModel>();
+        var instance = req.GetRouteValue("instance");
 
-            var instance = req.RouteValues["instance"].ToString();
+        _logger.LogInformation("Adding player {PlayerName} to game: {GameName}", model.PlayerName, instance);
 
-            return await entityClient.Orchestrate(instance, signalRMessages, game => game.Vote(model));
-        }
+        return await Orchestrate(req, instance!, game => game.AddPlayer(model));
+    }
 
-        [FunctionName(nameof(NewPromptTrigger))]
-        public async Task<IActionResult> NewPromptTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/prompt/new")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var prompt = this.cardService.GetPrompt();
+    [Function(nameof(NextRoundTrigger))]
+    public async Task<HttpResponseData> NextRoundTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/next")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("NextRound");
+        var prompt = _cardService.GetPrompt();
+        var instance = req.GetRouteValue("instance");
 
-            var instance = req.RouteValues["instance"].ToString();
+        _logger.LogInformation("Next round for game: {GameName}", instance);
 
-            return await entityClient.Orchestrate(instance, signalRMessages, game => game.NewPrompt(prompt));
-        }
+        return await Orchestrate(req, instance!, game => game.NextRound(prompt));
+    }
 
-        [FunctionName(nameof(ShufflePlayerCardsTrigger))]
-        public async Task<IActionResult> ShufflePlayerCardsTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/cards/shuffle")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var model = await req.Body<ShufflePlayerCardsModel>();
-            model.Responses = this.cardService.ShuffleResponses();
+    [Function(nameof(NewRoundTrigger))]
+    public async Task<HttpResponseData> NewRoundTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/new")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("NewRound");
+        var prompt = _cardService.GetPrompt();
+        var instance = req.GetRouteValue("instance");
 
-            var instance = req.RouteValues["instance"].ToString();
+        _logger.LogInformation("New round for game: {GameName}", instance);
 
-            return await entityClient.Orchestrate(instance, signalRMessages, game => game.ShufflePlayerCards(model));
-        }
+        return await Orchestrate(req, instance!, game => game.NewRound(prompt));
+    }
 
-        [FunctionName(nameof(ReplacePlayerCardTrigger))]
-        public async Task<IActionResult> ReplacePlayerCardTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/card/replace")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var model = await req.Body<ReplacePlayerCardRequest>();
-            model.Response = this.cardService.ShuffleResponses(1).First();
+    [Function(nameof(VoteTrigger))]
+    public async Task<HttpResponseData> VoteTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/vote")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("Vote");
+        var model = await req.ReadBodyAsync<VoteModel>();
+        var instance = req.GetRouteValue("instance");
 
-            var instance = req.RouteValues["instance"].ToString();
+        _logger.LogInformation("Vote in game: {GameName}", instance);
 
-            return await entityClient.Orchestrate(instance, signalRMessages, game => game.ReplacePlayerCard(model));
-        }
+        return await Orchestrate(req, instance!, game => game.Vote(model!));
+    }
 
-        [FunctionName(nameof(ResetResponseTrigger))]
-        public async Task<IActionResult> ResetResponseTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/respond/reset")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var model = await req.Body<ResetResponseRequest>();
+    [Function(nameof(NewPromptTrigger))]
+    public async Task<HttpResponseData> NewPromptTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/prompt/new")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("NewPrompt");
+        var prompt = _cardService.GetPrompt();
+        var instance = req.GetRouteValue("instance");
 
-            var instance = req.RouteValues["instance"].ToString();
+        _logger.LogInformation("New prompt for game: {GameName}", instance);
 
-            return await entityClient.Orchestrate(instance, signalRMessages, game => game.ResetResponse(model));
-        }
+        return await Orchestrate(req, instance!, game => game.NewPrompt(prompt));
+    }
 
-        [FunctionName(nameof(RespondTrigger))]
-        public async Task<IActionResult> RespondTrigger(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/respond")] HttpRequest req,
-            [ActorTableEntity] IActorTableEntityClient entityClient,
-            [SignalR(HubName = "cah")] IAsyncCollector<SignalRMessage> signalRMessages)
-        {
-            var model = await req.Body<RespondModel>();
+    [Function(nameof(ShufflePlayerCardsTrigger))]
+    public async Task<HttpResponseData> ShufflePlayerCardsTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/cards/shuffle")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("ShuffleCards");
+        var model = await req.ReadBodyAsync<ShufflePlayerCardsModel>();
+        model!.Responses = _cardService.ShuffleResponses();
 
-            var instance = req.RouteValues["instance"].ToString();
+        var instance = req.GetRouteValue("instance");
 
-            return await entityClient.Orchestrate(instance, signalRMessages, game => game.Respond(model));
-        }
+        _logger.LogInformation("Shuffling cards for game: {GameName}", instance);
+
+        return await Orchestrate(req, instance!, game => game.ShufflePlayerCards(model));
+    }
+
+    [Function(nameof(ReplacePlayerCardTrigger))]
+    public async Task<HttpResponseData> ReplacePlayerCardTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/card/replace")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("ReplaceCard");
+        var model = await req.ReadBodyAsync<ReplacePlayerCardRequest>();
+        model!.Response = _cardService.ShuffleResponses(1).First();
+
+        var instance = req.GetRouteValue("instance");
+
+        _logger.LogInformation("Replacing card for game: {GameName}", instance);
+
+        return await Orchestrate(req, instance!, game => game.ReplacePlayerCard(model));
+    }
+
+    [Function(nameof(ResetResponseTrigger))]
+    public async Task<HttpResponseData> ResetResponseTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/respond/reset")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("ResetResponse");
+        var model = await req.ReadBodyAsync<ResetResponseRequest>();
+        var instance = req.GetRouteValue("instance");
+
+        _logger.LogInformation("Reset response for game: {GameName}", instance);
+
+        return await Orchestrate(req, instance!, game => game.ResetResponse(model!));
+    }
+
+    [Function(nameof(RespondTrigger))]
+    public async Task<HttpResponseData> RespondTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/respond")] HttpRequestData req)
+    {
+        using var activity = ActivitySource.StartActivity("Respond");
+        var model = await req.ReadBodyAsync<RespondModel>();
+        var instance = req.GetRouteValue("instance");
+
+        _logger.LogInformation("Respond for game: {GameName}", instance);
+
+        return await Orchestrate(req, instance!, game => game.Respond(model!));
+    }
+
+    private async Task<HttpResponseData> Orchestrate(HttpRequestData req, string name, Action<Game> action)
+    {
+        await using var state = await _entityClient.GetLocked<Game>("game", name.Slugify());
+
+        action?.Invoke(state.Entity);
+
+        await state.Flush();
+        
+        // Notify state change for long polling
+        _gameStateService.NotifyGameUpdate(name, state.Entity.Version);
+
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(state.Entity);
+        return response;
     }
 }

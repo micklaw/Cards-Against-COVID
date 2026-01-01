@@ -19,7 +19,7 @@ namespace CardsAgainstHumanity.UI.State.Games.Models
 
         public IList<Player> Players { get; set; } = new List<Player>();
 
-        public Round CurrentRound { get; set; }
+        public Round? CurrentRound { get; set; }
 
         public IList<Round> PreviousRounds { get; set; } = new List<Round>();
 
@@ -30,5 +30,7 @@ namespace CardsAgainstHumanity.UI.State.Games.Models
         public Dictionary<int, int> Score => PreviousRounds?.GroupBy(i => i.WonBy).ToDictionary(i => i.Key, i => i.Count());
 
         public string ETag { get; set; }
+        
+        public int Version { get; set; }
     }
 }

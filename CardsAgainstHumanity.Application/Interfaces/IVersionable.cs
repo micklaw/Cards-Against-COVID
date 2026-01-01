@@ -2,6 +2,6 @@
 {
     public interface IVersionable
     {
-        string ETag { get; set; }
+        int Version { get; set; }
     }
 }

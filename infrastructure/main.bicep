@@ -21,7 +21,6 @@ var storageAccountName = '${baseName}storage${uniqueSuffix}'
 var functionAppName = '${baseName}-func-${environmentName}-${uniqueSuffix}'
 var appServicePlanName = '${baseName}-plan-${environmentName}-${uniqueSuffix}'
 var staticWebAppName = '${baseName}-swa-${environmentName}-${uniqueSuffix}'
-var signalRName = '${baseName}-signalr-${environmentName}-${uniqueSuffix}'
 var applicationInsightsName = '${baseName}-ai-${environmentName}-${uniqueSuffix}'
 var logAnalyticsName = '${baseName}-la-${environmentName}-${uniqueSuffix}'
 
@@ -37,7 +36,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   }
 }
 
-// Application Insights
+// Application Insights with OpenTelemetry support
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: applicationInsightsName
   location: location
@@ -45,6 +44,7 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   properties: {
     Application_Type: 'web'
     WorkspaceResourceId: logAnalytics.id
+    IngestionMode: 'LogAnalytics'
   }
 }
 
@@ -72,31 +72,6 @@ resource tableService 'Microsoft.Storage/storageAccounts/tableServices@2023-05-0
   name: 'default'
 }
 
-// SignalR Service
-resource signalR 'Microsoft.SignalRService/signalR@2024-03-01' = {
-  name: signalRName
-  location: location
-  sku: {
-    name: 'Free_F1'
-    tier: 'Free'
-    capacity: 1
-  }
-  kind: 'SignalR'
-  properties: {
-    features: [
-      {
-        flag: 'ServiceMode'
-        value: 'Serverless'
-      }
-    ]
-    cors: {
-      allowedOrigins: [
-        '*'
-      ]
-    }
-  }
-}
-
 // App Service Plan (Consumption)
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: appServicePlanName
@@ -111,7 +86,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   }
 }
 
-// Function App
+// Function App with isolated worker model and OpenTelemetry
 resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   name: functionAppName
   location: location
@@ -119,7 +94,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   properties: {
     serverFarmId: appServicePlan.id
     siteConfig: {
-      linuxFxVersion: 'DOTNET|6.0'
+      linuxFxVersion: 'DOTNET-ISOLATED|8.0'
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
@@ -139,7 +114,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
         }
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: 'dotnet'
+          value: 'dotnet-isolated'
         }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
@@ -148,10 +123,6 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
           value: applicationInsights.properties.ConnectionString
-        }
-        {
-          name: 'AzureSignalRConnectionString'
-          value: signalR.listKeys().primaryConnectionString
         }
       ]
       cors: {
@@ -167,7 +138,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   }
 }
 
-// Static Web App
+// Static Web App for React frontend
 resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
   name: staticWebAppName
   location: location
@@ -179,9 +150,9 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
     repositoryUrl: ''
     branch: ''
     buildProperties: {
-      appLocation: 'CardsAgainstHumanity.UI'
+      appLocation: 'CardsAgainstHumanity.Web'
       apiLocation: ''
-      outputLocation: 'wwwroot'
+      outputLocation: 'dist'
     }
   }
 }
@@ -196,6 +167,16 @@ resource staticWebAppBackend 'Microsoft.Web/staticSites/linkedBackends@2023-12-0
   }
 }
 
+// Static Web App - Config for Application Insights
+resource staticWebAppConfig 'Microsoft.Web/staticSites/config@2023-12-01' = {
+  parent: staticWebApp
+  name: 'appsettings'
+  properties: {
+    APPINSIGHTS_INSTRUMENTATIONKEY: applicationInsights.properties.InstrumentationKey
+    APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString
+  }
+}
+
 // Outputs
 output storageAccountName string = storageAccount.name
 output storageAccountConnectionString string = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
@@ -204,6 +185,5 @@ output functionAppUrl string = 'https://${functionApp.properties.defaultHostName
 output staticWebAppName string = staticWebApp.name
 output staticWebAppUrl string = 'https://${staticWebApp.properties.defaultHostname}'
 output staticWebAppDeploymentToken string = staticWebApp.listSecrets().properties.apiKey
-output signalRConnectionString string = signalR.listKeys().primaryConnectionString
 output applicationInsightsInstrumentationKey string = applicationInsights.properties.InstrumentationKey
 output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString
