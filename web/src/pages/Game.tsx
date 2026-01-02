@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchGame, selectGame, selectFetching, selectCurrentPlayerId, updateGame, resetGame, setCurrentPlayer } from '../store/gameSlice';
 import { useLongPolling } from '../hooks/useLongPolling';
 import { getPlayerCookie } from '../utils/cookies';
 import GameTabs from '../components/GameTabs';
+import type { Game as GameType } from '../types/game';
 
 const Game: React.FC = () => {
   const { instance } = useParams<{ instance: string }>();
@@ -39,13 +40,16 @@ const Game: React.FC = () => {
     }
   }, [game, instance, currentPlayerId, dispatch]);
 
+  // Memoize the update handler to prevent polling restarts
+  const handleGameUpdate = useCallback((updatedGame: GameType) => {
+    dispatch(updateGame(updatedGame));
+  }, [dispatch]);
+
   // Setup long polling for updates
   useLongPolling(
     instance || '',
     game?.version || 0,
-    (updatedGame) => {
-      dispatch(updateGame(updatedGame));
-    },
+    handleGameUpdate,
     !!game
   );
 

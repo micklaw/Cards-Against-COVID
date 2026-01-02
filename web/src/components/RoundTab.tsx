@@ -192,7 +192,7 @@ const RoundTab: React.FC = () => {
                     {getPlayerName(response.playerId, true)}
                     {isWinner && <span className="winner-star"> ⭐</span>}
                   </div>
-                  {currentRound.isWon && voteCount > 0 && (
+                  {(currentRound.isWon || isHovered) && voteCount > 0 && (
                     <div className="vote-count">
                       {voteCount} {voteCount === 1 ? 'vote' : 'votes'}
                     </div>

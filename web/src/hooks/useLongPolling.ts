@@ -3,9 +3,13 @@ import { useEffect, useRef } from 'react';
 import { gameApi } from '../api/gameApi';
 import type { Game } from '../types/game';
 
-const MIN_POLL_INTERVAL = 500;      // Start at 500ms
-const MAX_POLL_INTERVAL = 8000;     // Max out at 8 seconds (between 5-10s range)
+const MIN_POLL_INTERVAL = 3000;     // Start at 3 seconds
+const MAX_POLL_INTERVAL = 15000;    // Max out at 15 seconds
 const BACKOFF_MULTIPLIER = 1.5;     // Increase by 50% each time
+const POST_UPDATE_DELAY = 5000;     // Wait 5 seconds after receiving an update
+
+// Global tracking to prevent duplicate polling loops across React Strict Mode remounts
+const activePollers = new Set<string>();
 
 export function useLongPolling(
   gameUrl: string,
@@ -13,12 +17,15 @@ export function useLongPolling(
   onUpdate: (game: Game) => void,
   enabled: boolean
 ) {
-  const pollingRef = useRef<boolean>(false);
-  const timeoutRef = useRef<number | undefined>(undefined);
+  // Use refs for callback and version to avoid stale closures
+  const onUpdateRef = useRef(onUpdate);
   const versionRef = useRef(currentVersion);
-  const pollIntervalRef = useRef(MIN_POLL_INTERVAL);
 
-  // Update version ref when it changes
+  // Update refs when props change
+  useEffect(() => {
+    onUpdateRef.current = onUpdate;
+  }, [onUpdate]);
+
   useEffect(() => {
     versionRef.current = currentVersion;
   }, [currentVersion]);
@@ -28,53 +35,65 @@ export function useLongPolling(
       return;
     }
 
-    async function poll() {
-      if (pollingRef.current || !gameUrl) return;
+    // Prevent duplicate polling loops (React Strict Mode protection)
+    if (activePollers.has(gameUrl)) {
+      console.log(`[useLongPolling] Skipping duplicate poller for ${gameUrl}`);
+      return;
+    }
 
-      pollingRef.current = true;
+    activePollers.add(gameUrl);
+    console.log(`[useLongPolling] Starting poller for ${gameUrl}`);
+
+    let isCancelled = false;
+    let timeoutId: number | undefined;
+    let pollInterval = MIN_POLL_INTERVAL;
+
+    async function poll() {
+      if (isCancelled) return;
 
       try {
         const result = await gameApi.poll(gameUrl, versionRef.current);
-        
+
+        if (isCancelled) return;
+
         if (result.hasUpdate) {
           // Fetch the updated game state
           const updatedGame = await gameApi.getGame(gameUrl);
-          onUpdate(updatedGame);
           
-          // Reset backoff on successful update detection
-          pollIntervalRef.current = MIN_POLL_INTERVAL;
+          if (isCancelled) return;
+          
+          onUpdateRef.current(updatedGame);
+          
+          // After receiving an update, use a longer delay
+          pollInterval = POST_UPDATE_DELAY;
         } else {
           // No update - increase backoff interval
-          pollIntervalRef.current = Math.min(
-            pollIntervalRef.current * BACKOFF_MULTIPLIER,
-            MAX_POLL_INTERVAL
-          );
+          pollInterval = Math.min(pollInterval * BACKOFF_MULTIPLIER, MAX_POLL_INTERVAL);
         }
-
-        // Continue polling with current interval
-        timeoutRef.current = window.setTimeout(() => {
-          pollingRef.current = false;
-          poll();
-        }, pollIntervalRef.current);
       } catch (error) {
         console.error('Polling error:', error);
-        
         // On error, use max backoff interval
-        pollIntervalRef.current = MAX_POLL_INTERVAL;
-        timeoutRef.current = window.setTimeout(() => {
-          pollingRef.current = false;
-          poll();
-        }, pollIntervalRef.current);
+        pollInterval = MAX_POLL_INTERVAL;
+      }
+
+      // Schedule next poll if not cancelled
+      if (!isCancelled) {
+        timeoutId = window.setTimeout(poll, pollInterval);
       }
     }
 
+    // Start polling
     poll();
 
+    // Cleanup function
     return () => {
-      pollingRef.current = false;
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      console.log(`[useLongPolling] Stopping poller for ${gameUrl}`);
+      isCancelled = true;
+      activePollers.delete(gameUrl);
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
       }
     };
-  }, [gameUrl, enabled, onUpdate]);
+  }, [gameUrl, enabled]); // Only re-run when gameUrl or enabled changes
 }
+
