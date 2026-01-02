@@ -105,115 +105,106 @@ const RoundTab: React.FC = () => {
 
   return (
     <div className="mt-4">
-      {/* Main layout: side-by-side on desktop, stacked on mobile */}
-      <div className="flex flex-col lg:flex-row lg:gap-8 lg:items-start">
-        {/* Left column: Prompt card and controls */}
-        <div className="lg:flex-shrink-0">
-          <div className="mt-4">
-            <Card type={CardType.Prompt} text={currentRound.prompt} />
+      {/* Cards grid - prompt first, then responses */}
+      <div className="response-cards-container">
+        <div className="response-cards-grid">
+          {/* Prompt card */}
+          <div className="response-card-item prompt-card">
+            <div className="response-card-content">
+              <Card type={CardType.Prompt} text={currentRound.prompt} />
+            </div>
           </div>
 
-          {partOfCurrentGame && (
-            <>
-              <p className="text-gray-500 dark:text-gray-400 italic mb-4 mt-4 text-center lg:text-left">
-                Change the prompt, or restart round.
-              </p>
-              <div className="flex justify-center lg:justify-start gap-2 mb-6 flex-wrap">
-                <button type="button" className="btn btn-primary" onClick={handleNewPrompt}>
-                  🔄 Change
-                </button>
-                <button type="button" className="btn btn-primary" onClick={handleNewRound}>
-                  🔁 Restart
-                </button>
-                {!currentRound.isWon && currentRound.hasResponses && (
-                  <button type="button" className="btn btn-success" onClick={handleReveal}>
-                    🏆 Winner
-                  </button>
-                )}
-                {currentRound.isWon && (
-                  <button type="button" className="btn btn-primary" onClick={handleNext}>
-                    ⏭️ Next round
-                  </button>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Right column: Responses */}
-        <div className="flex-1">
-          {currentRound.hasResponses ? (
-            <>
-              <div className="card-stack-container">
-                <div className="card-stack">
-                  {currentRound.responses.map((response, index) => {
-                    const responseCards = getResponseCards(response.playerId, response.responses);
-                    const isWinner = currentRound.isWon && currentRound.wonBy === response.playerId;
-                    const isHovered = hoveredCardIndex === index;
-                    const isSelected = selectedCardIndex === index;
-                    const shouldShowFront = isWinner && currentRound.isWon;
-                    const voteCount = getCurrentRoundPlayerVotes(response.playerId);
-                    
-                    // Calculate z-index: winner on top, selected next, hovered above others, rest in order
-                    let zIndex = index;
-                    if (isHovered && !shouldShowFront) zIndex = 100;
-                    if (isSelected && !shouldShowFront) zIndex = 101;
-                    if (shouldShowFront) zIndex = 200;
-                    
-                    return (
-                      <div
-                        key={response.playerId}
-                        className={`card-stack-item ${
-                          isHovered ? 'hovered' : ''
-                        } ${
-                          shouldShowFront ? 'winner' : ''
-                        } ${
-                          isSelected ? 'selected' : ''
-                        }`}
-                        style={{
-                          '--card-index': index,
-                          '--z-index': zIndex
-                        } as React.CSSProperties}
-                        onMouseEnter={() => !shouldShowFront && setHoveredCardIndex(index)}
-                        onMouseLeave={() => setHoveredCardIndex(null)}
-                        onClick={() => handleCardClick(index, response.playerId)}
-                      >
-                        <div className="card-stack-content">
-                          {responseCards.map((cardText, cardIndex) => (
-                            <div key={cardIndex} className="stacked-card-wrapper">
-                              <Card type={CardType.Response} text={cardText} />
-                            </div>
-                          ))}
-                        </div>
-                        
-                        <div className="card-info">
-                          <div className="player-name">
-                            {getPlayerName(response.playerId, true)}
-                            {isWinner && <span className="winner-star"> ⭐</span>}
-                          </div>
-                          {voteCount > 0 && (
-                            <div className="vote-count">
-                              {voteCount} {voteCount === 1 ? 'vote' : 'votes'}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+          {/* Response cards */}
+          {currentRound.hasResponses && currentRound.responses.map((response, index) => {
+            const responseCards = getResponseCards(response.playerId, response.responses);
+            const isWinner = currentRound.isWon && currentRound.wonBy === response.playerId;
+            const isHovered = hoveredCardIndex === index;
+            const isSelected = selectedCardIndex === index;
+            const voteCount = getCurrentRoundPlayerVotes(response.playerId);
+            
+            return (
+              <div
+                key={response.playerId}
+                className={`response-card-item ${
+                  isHovered ? 'hovered' : ''
+                } ${
+                  isWinner ? 'winner' : ''
+                } ${
+                  isSelected ? 'selected' : ''
+                }`}
+                onMouseEnter={() => !isWinner && setHoveredCardIndex(index)}
+                onMouseLeave={() => setHoveredCardIndex(null)}
+                onClick={() => handleCardClick(index, response.playerId)}
+              >
+                <div className="response-card-content">
+                  {responseCards.map((cardText, cardIndex) => (
+                    <div key={cardIndex} className="mb-2 last:mb-0">
+                      <Card type={CardType.Response} text={cardText} />
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="response-card-info">
+                  <div className="player-name">
+                    {getPlayerName(response.playerId, true)}
+                    {isWinner && <span className="winner-star"> ⭐</span>}
+                  </div>
+                  {currentRound.isWon && voteCount > 0 && (
+                    <div className="vote-count">
+                      {voteCount} {voteCount === 1 ? 'vote' : 'votes'}
+                    </div>
+                  )}
                 </div>
               </div>
-              
-              {partOfCurrentGame && !hasVoted && !currentRound.isWon && (
-                <p className="voting-instructions">
-                  <i>Hover over cards to read them, click to vote</i>
-                </p>
-              )}
-            </>
-          ) : (
-            <p className="text-gray-500 dark:text-gray-400 text-center lg:text-left">No responses yet, hurry up</p>
-          )}
+            );
+          })}
         </div>
       </div>
+
+      {!currentRound.hasResponses && (
+        <p className="text-gray-500 dark:text-gray-400 text-center mt-4">No responses yet, hurry up</p>
+      )}
+
+      {/* Controls panel - centered below cards */}
+      {partOfCurrentGame && (
+        <div className="flex justify-center mt-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-2xl w-full">
+            {!currentRound.isWon && (
+              <>
+                <p className="text-gray-500 dark:text-gray-400 italic mb-4 text-center">
+                  Change the prompt, or restart round.
+                </p>
+                <div className="flex justify-center gap-2 flex-wrap">
+                  <button type="button" className="btn btn-primary" onClick={handleNewPrompt}>
+                    🔄 Change
+                  </button>
+                  <button type="button" className="btn btn-primary" onClick={handleNewRound}>
+                    🔁 Restart
+                  </button>
+                  {currentRound.hasResponses && (
+                    <button type="button" className="btn btn-success" onClick={handleReveal}>
+                      🏆 Winner
+                    </button>
+                  )}
+                </div>
+                {!hasVoted && currentRound.hasResponses && (
+                  <p className="text-center mt-4 text-gray-500 dark:text-gray-400 text-sm">
+                    <i>Hover over cards to read them, click to vote</i>
+                  </p>
+                )}
+              </>
+            )}
+            {currentRound.isWon && (
+              <div className="flex justify-center">
+                <button type="button" className="btn btn-primary" onClick={handleNext}>
+                  ⏭️ Again?
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
