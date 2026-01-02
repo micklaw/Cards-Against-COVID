@@ -5,9 +5,15 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  id-token: write
+  contents: write
+
 env:
   DOTNET_VERSION: '8.0.x'
   NODE_VERSION: '20.x'
+  AZURE_RESOURCE_GROUP: 'rgcardagainstcovid'
+  AZURE_REGION: 'westeurope'
 
 jobs:
   build-backend:
@@ -82,7 +88,9 @@ jobs:
     - name: Azure Login
       uses: azure/login@v2
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         
     - name: Deploy Bicep template at subscription level
       id: deploy
@@ -122,7 +130,9 @@ jobs:
     - name: Azure Login
       uses: azure/login@v2
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         
     - name: Deploy to Azure Functions
       uses: Azure/functions-action@v1
@@ -147,10 +157,11 @@ jobs:
     - name: Azure Login
       uses: azure/login@v2
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Get Static Web App deployment token
-      id: static_web_app_token
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        
+    - name: Deploy to Static Web App
       run: |
         TOKEN=$(az staticwebapp secrets list \
           --name ${{ needs.deploy-infrastructure.outputs.staticWebAppName }} \
