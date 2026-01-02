@@ -49,11 +49,6 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
   properties: {
     repositoryUrl: ''
     branch: ''
-    buildProperties: {
-      appLocation: 'web'
-      apiLocation: 'api'
-      outputLocation: 'dist'
-    }
   }
 }
 

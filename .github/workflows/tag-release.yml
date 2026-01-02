@@ -123,13 +123,13 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: frontend-package
-        path: ./web/dist
+        path: ./frontend-dist
         
     - name: Download API artifact
       uses: actions/download-artifact@v4
       with:
         name: api-package
-        path: ./api
+        path: ./api-dist
         
     - name: Azure Login
       uses: azure/login@v2
@@ -152,9 +152,9 @@ jobs:
         azure_static_web_apps_api_token: ${{ steps.static_web_app_token.outputs.deployment_token }}
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         action: "upload"
-        app_location: "./web"
-        api_location: "./api"
-        output_location: "dist"
+        app_location: "./frontend-dist"
+        api_location: "./api-dist"
+        output_location: "."
         skip_app_build: true
         skip_api_build: true
           
