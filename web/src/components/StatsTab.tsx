@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { selectGame, selectCurrentPlayerId, addPlayer, openGame, closeGame, finishGame } from '../store/gameSlice';
+import { isGameCreator } from '../utils/cookies';
 
 const StatsTab: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -10,9 +11,10 @@ const StatsTab: React.FC = () => {
 
   if (!game) return null;
 
-  const partOfCurrentGame = currentPlayerId !== null;
   const currentPlayer = game.players.find(p => p.id === currentPlayerId);
+  const partOfCurrentGame = currentPlayerId !== null && currentPlayer !== undefined;
   const roundCount = game.previousRounds.length + (game.currentRound ? 1 : 0);
+  const isCreator = isGameCreator(game.url);
   
   const overallWinner = game.score && Object.keys(game.score).length > 0
     ? game.players.find(p => p.id === parseInt(
@@ -111,21 +113,23 @@ const StatsTab: React.FC = () => {
                 Currently playing as <strong>{currentPlayer?.name}</strong>.
               </div>
             )}
-            <div className="form-group mt-2">
-              {!game.isOpen ? (
-                <button type="button" className="btn btn-success" onClick={handleOpen} title="Open the game">
-                  🔓 Open
+            {isCreator && (
+              <div className="form-group mt-2">
+                {!game.isOpen ? (
+                  <button type="button" className="btn btn-secondary" onClick={handleOpen} title="Open the game">
+                    🔒 Closed
+                  </button>
+                ) : (
+                  <button type="button" className="btn btn-success" onClick={handleClose} title="Close the game">
+                    🔓 Open
+                  </button>
+                )}
+                {' '}
+                <button type="button" className="btn btn-primary" onClick={handleFinish}>
+                  🏁 End
                 </button>
-              ) : (
-                <button type="button" className="btn btn-danger" onClick={handleClose} title="Close the game">
-                  🔒 Close
-                </button>
-              )}
-              {' '}
-              <button type="button" className="btn btn-primary" onClick={handleFinish}>
-                🏁 End
-              </button>
-            </div>
+              </div>
+            )}
           </form>
         </>
       ) : (

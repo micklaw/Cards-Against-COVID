@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { gameApi } from '../api/gameApi';
 import type { Game, Player } from '../types/game';
-import { setPlayerCookie, getPlayerCookie } from '../utils/cookies';
+import { setPlayerCookie, getPlayerCookie, setCreatorCookie, isGameCreator } from '../utils/cookies';
 
 interface GameState {
   game: Game | null;
@@ -22,7 +22,12 @@ const initialState: GameState = {
 export const createGame = createAsyncThunk(
   'game/create',
   async (gameName: string) => {
-    return await gameApi.createGame(gameName);
+    const game = await gameApi.createGame(gameName);
+    // Set creator cookie only for newly created games (version 1)
+    if (game.version === 1) {
+      setCreatorCookie(game.url);
+    }
+    return game;
   }
 );
 
