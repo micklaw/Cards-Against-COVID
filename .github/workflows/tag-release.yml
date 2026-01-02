@@ -158,8 +158,7 @@ jobs:
         skip_app_build: true
         skip_api_build: true
       env:
-        VERBOSE: true
-        SWA_CLI_DEBUG: '*'
+        SWA_CLI_DEBUG: 'silly'
           
     - name: Deployment Summary
       run: |
