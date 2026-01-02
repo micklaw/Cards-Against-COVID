@@ -33,8 +33,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{C37A3EB3-2
 		Docs\9.locked.JPG = Docs\9.locked.JPG
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActorTableEntities", "..\..\Actor-Table-Entities\ActorTableEntities\ActorTableEntities.csproj", "{9DCFF4A8-06AA-D04F-CBD3-E9B122F643AD}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,10 +47,6 @@ Global
 		{D8FC4973-8B14-4028-B9B3-13EC62D60FFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8FC4973-8B14-4028-B9B3-13EC62D60FFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8FC4973-8B14-4028-B9B3-13EC62D60FFA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9DCFF4A8-06AA-D04F-CBD3-E9B122F643AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9DCFF4A8-06AA-D04F-CBD3-E9B122F643AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9DCFF4A8-06AA-D04F-CBD3-E9B122F643AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9DCFF4A8-06AA-D04F-CBD3-E9B122F643AD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
