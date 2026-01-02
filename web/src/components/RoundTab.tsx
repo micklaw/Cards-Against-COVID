@@ -11,6 +11,48 @@ import {
 } from '../store/gameSlice';
 import Card, { CardType } from './Card';
 
+interface ControlButtonsProps {
+  currentRound: {
+    isWon: boolean;
+    hasResponses: boolean;
+  };
+  onNewPrompt: () => void;
+  onNewRound: () => void;
+  onReveal: () => void;
+  onNext: () => void;
+}
+
+const ControlButtons: React.FC<ControlButtonsProps> = ({
+  currentRound,
+  onNewPrompt,
+  onNewRound,
+  onReveal,
+  onNext
+}) => (
+  <div className="flex justify-center gap-2 flex-wrap">
+    {!currentRound.isWon && (
+      <>
+        <button type="button" className="btn btn-primary" onClick={onNewPrompt}>
+          🔄 Change
+        </button>
+        <button type="button" className="btn btn-primary" onClick={onNewRound}>
+          🔁 Restart
+        </button>
+        {currentRound.hasResponses && (
+          <button type="button" className="btn btn-success" onClick={onReveal}>
+            🏆 Winner
+          </button>
+        )}
+      </>
+    )}
+    {currentRound.isWon && (
+      <button type="button" className="btn btn-primary" onClick={onNext}>
+        ⏭️ Again?
+      </button>
+    )}
+  </div>
+);
+
 const RoundTab: React.FC = () => {
   const dispatch = useAppDispatch();
   const game = useAppSelector(selectGame);
@@ -90,7 +132,7 @@ const RoundTab: React.FC = () => {
 
   if (!currentRound) {
     return (
-      <div className="mt-4">
+      <div>
         <p className="mb-4 text-gray-600 dark:text-gray-300">No fun has begun</p>
         {partOfCurrentGame && (
           <div className="mb-4">
@@ -103,36 +145,8 @@ const RoundTab: React.FC = () => {
     );
   }
 
-  const ControlButtons = () => (
-    <div className="flex justify-center gap-2 flex-wrap">
-      {!currentRound.isWon && (
-        <>
-          <button type="button" className="btn btn-primary" onClick={handleNewPrompt}>
-            🔄 Change
-          </button>
-          <button type="button" className="btn btn-primary" onClick={handleNewRound}>
-            🔁 Restart
-          </button>
-          {currentRound.hasResponses && (
-            <button type="button" className="btn btn-success" onClick={handleReveal}>
-              🏆 Winner
-            </button>
-          )}
-        </>
-      )}
-      {currentRound.isWon && (
-        <button type="button" className="btn btn-primary" onClick={handleNext}>
-          ⏭️ Again?
-        </button>
-      )}
-    </div>
-  );
-
   return (
     <div className="mt-4">
-      {/* Controls panel - top */}
-      {partOfCurrentGame && <ControlButtons />}
-
       {/* Cards grid - prompt first, then responses */}
       <div className="response-cards-container mt-6">
         <div className="response-cards-grid">
@@ -190,19 +204,16 @@ const RoundTab: React.FC = () => {
         </div>
       </div>
 
-      {!currentRound.hasResponses && (
-        <p className="text-gray-500 dark:text-gray-400 text-center mt-4">No responses yet, hurry up</p>
-      )}
-
       {/* Controls panel - bottom */}
       {partOfCurrentGame && (
-        <div className="mt-8">
-          <ControlButtons />
-          {!hasVoted && currentRound.hasResponses && !currentRound.isWon && (
-            <p className="text-center mt-4 text-gray-500 dark:text-gray-400 text-sm">
-              <i>Hover over cards to read them, click to vote</i>
-            </p>
-          )}
+        <div>
+          <ControlButtons
+            currentRound={currentRound}
+            onNewPrompt={handleNewPrompt}
+            onNewRound={handleNewRound}
+            onReveal={handleReveal}
+            onNext={handleNext}
+          />
         </div>
       )}
     </div>

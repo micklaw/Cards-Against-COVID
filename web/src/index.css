@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css?family=Droid+Sans+Mono');
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Light theme colors */
   --color-primary: #3b82f6;
