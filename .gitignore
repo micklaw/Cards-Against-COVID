@@ -295,3 +295,7 @@ SmithEng.Invoices/src/**/*.map
 /Source/SmithEng.Invoices/wwwroot/js
 
 .azurite/
+
+# Bicep compiled ARM templates (exclude generated JSON files in infrastructure folder)
+infrastructure/*.json
+!infrastructure/parameters*.json

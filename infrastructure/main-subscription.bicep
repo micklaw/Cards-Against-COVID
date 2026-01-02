@@ -15,12 +15,6 @@ param baseName string = 'cah'
 @description('Storage account SKU')
 param storageAccountSku string = 'Standard_LRS'
 
-@description('Function App SKU')
-param functionAppSku string = 'Y1'
-
-@description('Function App SKU Family')
-param functionAppSkuFamily string = 'Y'
-
 // Create the resource group
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
@@ -41,8 +35,6 @@ module infrastructure 'main.bicep' = {
     environmentName: environmentName
     baseName: baseName
     storageAccountSku: storageAccountSku
-    functionAppSku: functionAppSku
-    functionAppSkuFamily: functionAppSkuFamily
   }
 }
 
@@ -50,8 +42,6 @@ module infrastructure 'main.bicep' = {
 output resourceGroupName string = resourceGroup.name
 output storageAccountName string = infrastructure.outputs.storageAccountName
 output storageAccountConnectionString string = infrastructure.outputs.storageAccountConnectionString
-output functionAppName string = infrastructure.outputs.functionAppName
-output functionAppUrl string = infrastructure.outputs.functionAppUrl
 output staticWebAppName string = infrastructure.outputs.staticWebAppName
 output staticWebAppUrl string = infrastructure.outputs.staticWebAppUrl
 output staticWebAppDeploymentToken string = infrastructure.outputs.staticWebAppDeploymentToken
