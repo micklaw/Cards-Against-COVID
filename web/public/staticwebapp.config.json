@@ -1,7 +1,4 @@
 {
-  "platform": {
-    "apiRuntime": "dotnet-isolated:8.0"
-  },
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": ["/api/*", "/*.{css,scss,js,png,gif,ico,jpg,svg,woff,woff2,ttf,eot}"]

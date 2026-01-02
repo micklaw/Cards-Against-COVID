@@ -184,20 +184,3 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Architecture" >> $GITHUB_STEP_SUMMARY
         echo "Using Azure Static Web Apps (Standard) with linked Azure Function App" >> $GITHUB_STEP_SUMMARY
-
-  create-release:
-    runs-on: ubuntu-latest
-    needs: [deploy-static-web-app]
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        generate_release_notes: true
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

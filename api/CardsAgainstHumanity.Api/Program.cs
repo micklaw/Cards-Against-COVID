@@ -1,29 +1,27 @@
-using System.Text.Json;
 using ActorTableEntities;
 using CardsAgainstHumanity.Api.Services;
 using CardsAgainstHumanity.Application.Services;
-using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Text.Json;
 
-var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults()
-    .ConfigureServices(services =>
-    {
-        // Configure JSON to use camelCase
-        services.Configure<JsonSerializerOptions>(options =>
-        {
-            options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-        });
-        
-        // Configure ActorTableEntities for table storage with blob locking
-        services.AddActorTableEntities(Environment.GetEnvironmentVariable("AzureWebJobsStorage") ?? "UseDevelopmentStorage=true");
+var builder = FunctionsApplication.CreateBuilder(args);
 
-        // Register application services
-        services.AddSingleton<ICardService, CardService>();
-        services.AddSingleton<IGameStateService, GameStateService>();
-        services.AddSingleton<IPollingService, PollingService>();
-    })
-    .Build();
+builder.ConfigureFunctionsWebApplication();
 
-host.Run();
+// Configure JSON to use camelCase
+builder.Services.Configure<JsonSerializerOptions>(options =>
+{
+    options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
+
+// Configure ActorTableEntities for table storage with blob locking
+builder.Services.AddActorTableEntities(Environment.GetEnvironmentVariable("AzureWebJobsStorage") ?? "UseDevelopmentStorage=true");
+
+// Register application services
+builder.Services.AddSingleton<ICardService, CardService>();
+builder.Services.AddSingleton<IGameStateService, GameStateService>();
+builder.Services.AddSingleton<IPollingService, PollingService>();
+
+builder.Build().Run();

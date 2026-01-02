@@ -1,17 +1,12 @@
 {
-  "version": "2.0",
-  "logging": {
-    "logLevel": {
-      "default": "Information",
-      "Function": "Information",
-      "Host.Results": "Information",
-      "Microsoft": "Warning"
+    "version": "2.0",
+    "logging": {
+        "applicationInsights": {
+            "samplingSettings": {
+                "isEnabled": true,
+                "excludedTypes": "Request"
+            },
+            "enableLiveMetricsFilters": true
+        }
     }
-  },
-  "functionTimeout": "00:05:00",
-  "extensions": {
-    "http": {
-      "routePrefix": "api"
-    }
-  }
 }
