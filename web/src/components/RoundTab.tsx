@@ -10,12 +10,14 @@ import {
   vote
 } from '../store/gameSlice';
 import Card, { CardType } from './Card';
+import '../styles/RoundTab.css';
 
 const RoundTab: React.FC = () => {
   const dispatch = useAppDispatch();
   const game = useAppSelector(selectGame);
   const currentPlayerId = useAppSelector(selectCurrentPlayerId);
-  const [viewingResponses, setViewingResponses] = useState<string[]>([]);
+  const [hoveredCardIndex, setHoveredCardIndex] = useState<number | null>(null);
+  const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
 
   if (!game) return null;
 
@@ -40,26 +42,6 @@ const RoundTab: React.FC = () => {
   const getCurrentRoundPlayerVotes = (playerId: number): number => {
     if (!currentRound) return 0;
     return currentRound.votes.filter(v => v === playerId).length;
-  };
-
-  const handleViewResponses = (playerId: number, responseIndices: number[]) => {
-    const player = game.players.find(p => p.id === playerId);
-    if (!player?.cards) {
-      setViewingResponses([]);
-      return;
-    }
-
-    const responses: string[] = [];
-    responseIndices.forEach(index => {
-      if (index < player.cards.length) {
-        responses.push(player.cards[index]);
-      }
-    });
-    setViewingResponses(responses);
-  };
-
-  const handleCloseResponses = () => {
-    setViewingResponses([]);
   };
 
   const handleNewRound = () => {
@@ -92,6 +74,21 @@ const RoundTab: React.FC = () => {
     }
   };
 
+  const getResponseCards = (playerId: number, responseIndices: number[]): string[] => {
+    const player = game?.players.find(p => p.id === playerId);
+    if (!player?.cards) return [];
+    
+    return responseIndices
+      .map(index => index < player.cards.length ? player.cards[index] : null)
+      .filter((card): card is string => card !== null);
+  };
+
+  const handleCardClick = (index: number, playerId: number) => {
+    if (!partOfCurrentGame || hasVoted || !currentRound) return;
+    setSelectedCardIndex(index);
+    handleVote(playerId);
+  };
+
   if (!currentRound) {
     return (
       <div className="mt-2">
@@ -115,24 +112,6 @@ const RoundTab: React.FC = () => {
         <Card type={CardType.Prompt} text={currentRound.prompt} />
       </div>
 
-      {viewingResponses.length > 0 && (
-        <>
-          <ul className="list-unstyled justify-content-center mt-1">
-            {viewingResponses.map((response, index) => (
-              <li key={index} className="response-list">
-                <Card type={CardType.Response} text={response} />
-                <div className="invisible">.</div>
-              </li>
-            ))}
-          </ul>
-          <p>
-            <button type="button" className="btn btn-primary mb-3" onClick={handleCloseResponses}>
-              Hide
-            </button>
-          </p>
-        </>
-      )}
-
       {partOfCurrentGame && (
         <>
           <p><i>Change the prompt, or restart round.</i></p>
@@ -150,53 +129,74 @@ const RoundTab: React.FC = () => {
         </>
       )}
 
-      <h5 className="font-weight-bold">Votes</h5>
+      <h5 className="font-weight-bold">Responses</h5>
 
       {currentRound.hasResponses ? (
         <>
-          <table className="table table-sm table-dark">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th className="text-right">Responses</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentRound.responses.map(response => (
-                <tr key={response.playerId}>
-                  <td>
-                    {getPlayerName(response.playerId, true)}
-                    {currentRound.isWon && currentRound.wonBy === response.playerId && (
-                      <span> ⭐</span>
-                    )}
-                  </td>
-                  <td className="text-right">{getCurrentRoundPlayerVotes(response.playerId)}</td>
-                  <td>
-                    <div className="float-right">
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-primary"
-                        onClick={() => handleViewResponses(response.playerId, response.responses)}
-                      >
-                        View
-                      </button>
-                      {' '}
-                      {partOfCurrentGame && !hasVoted && (
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-primary"
-                          onClick={() => handleVote(response.playerId)}
-                        >
-                          Vote
-                        </button>
+          <div className="card-stack-container">
+            <div className="card-stack">
+              {currentRound.responses.map((response, index) => {
+                const responseCards = getResponseCards(response.playerId, response.responses);
+                const isWinner = currentRound.isWon && currentRound.wonBy === response.playerId;
+                const isHovered = hoveredCardIndex === index;
+                const isSelected = selectedCardIndex === index;
+                const shouldShowFront = isWinner && currentRound.isWon;
+                const voteCount = getCurrentRoundPlayerVotes(response.playerId);
+                
+                // Calculate z-index: winner on top, selected next, hovered above others, rest in order
+                let zIndex = index;
+                if (isHovered && !shouldShowFront) zIndex = 100;
+                if (isSelected && !shouldShowFront) zIndex = 101;
+                if (shouldShowFront) zIndex = 200;
+                
+                return (
+                  <div
+                    key={response.playerId}
+                    className={`card-stack-item ${
+                      isHovered ? 'hovered' : ''
+                    } ${
+                      shouldShowFront ? 'winner' : ''
+                    } ${
+                      isSelected ? 'selected' : ''
+                    }`}
+                    style={{
+                      '--card-index': index,
+                      '--z-index': zIndex
+                    } as React.CSSProperties}
+                    onMouseEnter={() => !shouldShowFront && setHoveredCardIndex(index)}
+                    onMouseLeave={() => setHoveredCardIndex(null)}
+                    onClick={() => handleCardClick(index, response.playerId)}
+                  >
+                    <div className="card-stack-content">
+                      {responseCards.map((cardText, cardIndex) => (
+                        <div key={cardIndex} className="stacked-card-wrapper">
+                          <Card type={CardType.Response} text={cardText} />
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="card-info">
+                      <div className="player-name">
+                        {getPlayerName(response.playerId, true)}
+                        {isWinner && <span className="winner-star"> ⭐</span>}
+                      </div>
+                      {voteCount > 0 && (
+                        <div className="vote-count">
+                          {voteCount} {voteCount === 1 ? 'vote' : 'votes'}
+                        </div>
                       )}
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
+          {partOfCurrentGame && !hasVoted && !currentRound.isWon && (
+            <p className="voting-instructions">
+              <i>Hover over cards to read them, click to vote</i>
+            </p>
+          )}
 
           {partOfCurrentGame && (
             <form>

@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { gameApi } from '../api/gameApi';
 import type { Game, Player } from '../types/game';
-import { setPlayerCookie, getPlayerCookie, setCreatorCookie, isGameCreator } from '../utils/cookies';
+import { setPlayerCookie, setCreatorCookie } from '../utils/cookies';
 
 interface GameState {
   game: Game | null;

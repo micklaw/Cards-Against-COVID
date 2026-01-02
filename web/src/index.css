@@ -171,6 +171,8 @@ body {
   margin: 0 auto;
   display: inline-block;
   border: 1px solid rgba(0, 0, 0, 0.125);
+  position: relative;
+  overflow: hidden;
 }
 
 .card h5.card-title {
