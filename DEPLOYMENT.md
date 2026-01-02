@@ -1,6 +1,6 @@
 # Azure Deployment Setup Guide
 
-This guide walks you through setting up Azure deployment for the Cards Against COVID project using the new `deploy-to-azure.yml` workflow.
+This guide walks you through setting up Azure deployment for the Cards Against COVID project using the tag-based deployment workflow.
 
 ## Prerequisites
 
@@ -71,28 +71,22 @@ Navigate to your GitHub repository settings and add the following secrets:
 
 ### 3. Trigger Deployment
 
-You can trigger the deployment in two ways:
+Deployment is triggered automatically when you create and push a version tag:
 
-#### Option A: Automatic Deployment (Push)
-
-Push changes to `main` or `master` branch:
 ```bash
-git push origin main
+# Create a new version tag
+git tag v1.0.0
+
+# Push the tag to trigger deployment
+git push origin v1.0.0
 ```
 
-This will automatically deploy to the **dev** environment.
-
-#### Option B: Manual Deployment (Workflow Dispatch)
-
-1. Go to **Actions** tab in your GitHub repository
-2. Select **Deploy to Azure** workflow
-3. Click **Run workflow** button
-4. Click **Run workflow** to start the deployment
+The tag must follow the pattern `v*.*.*` (e.g., v1.0.0, v2.1.3) to trigger the deployment workflow.
 
 ### 4. Monitor Deployment
 
 1. Go to **Actions** tab in GitHub
-2. Click on the running workflow
+2. Click on the running workflow (triggered by your tag)
 3. Monitor the progress of each job:
    - **build**: Compiles and packages the application
    - **deploy-infrastructure**: Creates Azure resources

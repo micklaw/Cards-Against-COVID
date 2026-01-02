@@ -69,11 +69,10 @@ az deployment group create \
 
 The infrastructure is automatically deployed via GitHub Actions workflows:
 
-- **`deploy-to-azure.yml`**: New configurable deployment using subscription-level Bicep
-- **`release.yml`**: Existing deployment workflow for dev/staging
-- **`tag-release.yml`**: Production deployment on version tags
+- **`tag-release.yml`**: Production deployment triggered on version tags (v*.*.*)
+- **`pr-build.yml`**: Build and test validation on pull requests
 
-#### Setup GitHub Secrets for deploy-to-azure.yml
+#### Setup GitHub Secrets
 
 Add the following secrets to your GitHub repository:
 
@@ -113,12 +112,20 @@ Add the following secrets to your GitHub repository:
    - Used for validation and logging
    - Can be found in the AZURE_CREDENTIALS JSON
 
-#### Using the deploy-to-azure.yml Workflow
+#### Triggering Deployment
 
-The workflow can be triggered in two ways:
+Deployment is automatically triggered when you push a version tag:
 
-1. **Automatic**: Pushes to `main` or `master` branches automatically deploy to production environment
-2. **Manual**: Use the "Run workflow" button in GitHub Actions tab to manually trigger deployment
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The workflow will:
+1. Build the .NET API and React frontend
+2. Deploy infrastructure using subscription-level Bicep
+3. Deploy the Function App and Static Web App
+4. Create a GitHub Release
 
 ## Parameters
 
