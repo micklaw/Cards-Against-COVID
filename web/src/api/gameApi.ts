@@ -113,7 +113,7 @@ class GameApi {
   // Replace a specific card
   async replaceCard(gameUrl: string, playerId: number, cardIndex: number): Promise<Game> {
     const response = await this.client.post<Game>(
-      `/game/${gameUrl}/player/replace`,
+      `/game/${gameUrl}/player/card/replace`,
       { playerId, cardIndex }
     );
     return response.data;
@@ -122,7 +122,7 @@ class GameApi {
   // Shuffle all cards
   async shuffleCards(gameUrl: string, playerId: number): Promise<Game> {
     const response = await this.client.post<Game>(
-      `/game/${gameUrl}/player/shuffle`,
+      `/game/${gameUrl}/player/cards/shuffle`,
       { playerId }
     );
     return response.data;

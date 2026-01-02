@@ -30,14 +30,14 @@ const Index: React.FC = () => {
     <div className="aligner">
       <main role="main" className="inner cover">
         <h1 className="cover-heading">Cards Against COVID-19.</h1>
-        <div className="row text-center">
-          <div className="col-lg">
+        <div className="row text-center justify-content-center">
+          <div className="col-12 col-md-8 col-lg-6">
             <div className="form-group">
               <p>Start a new game or join and existing one?</p>
               <input
                 type="text"
                 maxLength={50}
-                className="form-control"
+                className="form-control text-center game-input"
                 placeholder="Enter the name of the game."
                 value={gameName}
                 onChange={(e) => setGameName(e.target.value)}

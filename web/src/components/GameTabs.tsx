@@ -6,6 +6,7 @@ import GameTab from './GameTab';
 import StatsTab from './StatsTab';
 import RoundTab from './RoundTab';
 import CardsTab from './CardsTab';
+import { Link } from 'react-router';
 
 interface NavTab {
   tab: Tab;
@@ -60,7 +61,7 @@ const GameTabs: React.FC = () => {
                 </a>
               );
             })}
-            <a className="nav-link" href="/">New</a>
+            <Link className="nav-link" to="/">New</Link>
           </nav>
         </div>
       </header>

@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { gameApi } from '../api/gameApi';
 import type { Game, Player } from '../types/game';
+import { setPlayerCookie, getPlayerCookie } from '../utils/cookies';
 
 interface GameState {
   game: Game | null;
@@ -35,7 +36,8 @@ export const fetchGame = createAsyncThunk(
 export const addPlayer = createAsyncThunk(
   'game/addPlayer',
   async ({ gameUrl, playerName }: { gameUrl: string; playerName: string }) => {
-    return await gameApi.addPlayer(gameUrl, playerName);
+    const game = await gameApi.addPlayer(gameUrl, playerName);
+    return { game, gameUrl };
   }
 );
 
@@ -129,6 +131,11 @@ const gameSlice = createSlice({
     updateGame: (state, action: PayloadAction<Game>) => {
       state.game = action.payload;
     },
+    resetGame: (state) => {
+      state.game = null;
+      state.currentPlayerId = null;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     // Create game
@@ -161,11 +168,14 @@ const gameSlice = createSlice({
 
     // Add player
     builder.addCase(addPlayer.fulfilled, (state, action) => {
-      state.game = action.payload;
+      const { game, gameUrl } = action.payload;
+      state.game = game;
       // Set current player to the last added player
-      if (action.payload.players.length > 0) {
-        const lastPlayer = action.payload.players[action.payload.players.length - 1];
+      if (game.players.length > 0) {
+        const lastPlayer = game.players[game.players.length - 1];
         state.currentPlayerId = lastPlayer.id;
+        // Save player ID to cookie for persistence (use gameUrl from request, not response)
+        setPlayerCookie(gameUrl, lastPlayer.id);
       }
     });
 
@@ -192,7 +202,7 @@ const gameSlice = createSlice({
   },
 });
 
-export const { setCurrentPlayer, clearError, updateGame } = gameSlice.actions;
+export const { setCurrentPlayer, clearError, updateGame, resetGame } = gameSlice.actions;
 
 // Selectors
 export const selectGame = (state: { game: GameState }) => state.game.game;
