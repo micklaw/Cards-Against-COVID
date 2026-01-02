@@ -39,7 +39,7 @@ resource tableService 'Microsoft.Storage/storageAccounts/tableServices@2023-05-0
   name: 'default'
 }
 
-// App Service Plan (Consumption - Linux)
+// App Service Plan (Consumption - Windows)
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: appServicePlanName
   location: location
@@ -47,26 +47,25 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
     name: 'Y1'
     tier: 'Dynamic'
   }
-  kind: 'linux'
   properties: {
-    reserved: true
+    reserved: false
   }
 }
 
-// Azure Function App - .NET 8 Isolated (Linux Consumption)
+// Azure Function App - .NET 8 Isolated (Windows Consumption)
 resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   name: functionAppName
   location: location
-  kind: 'functionapp,linux'
+  kind: 'functionapp'
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
     serverFarmId: appServicePlan.id
     httpsOnly: true
-    reserved: true
+    reserved: false
     siteConfig: {
-      linuxFxVersion: 'DOTNET-ISOLATED|8.0'
+      netFrameworkVersion: 'v8.0'
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
