@@ -158,8 +158,8 @@ jobs:
         skip_app_build: true
         skip_api_build: true
       env:
-        SWA_CLI_API_LANGUAGE: dotnet
-        SWA_CLI_API_VERSION: "8.0"
+        AZURE_FUNCTIONS_API_LANGUAGE: dotnet-isolated
+        AZURE_FUNCTIONS_API_VERSION: "8.0"
           
     - name: Deployment Summary
       run: |
