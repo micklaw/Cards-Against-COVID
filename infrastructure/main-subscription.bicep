@@ -45,3 +45,5 @@ output storageAccountConnectionString string = infrastructure.outputs.storageAcc
 output staticWebAppName string = infrastructure.outputs.staticWebAppName
 output staticWebAppUrl string = infrastructure.outputs.staticWebAppUrl
 output staticWebAppDeploymentToken string = infrastructure.outputs.staticWebAppDeploymentToken
+output functionAppName string = infrastructure.outputs.functionAppName
+output functionAppUrl string = infrastructure.outputs.functionAppUrl

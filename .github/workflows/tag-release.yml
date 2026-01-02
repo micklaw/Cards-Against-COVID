@@ -80,7 +80,6 @@ jobs:
       functionAppName: ${{ steps.deploy.outputs.functionAppName }}
       staticWebAppName: ${{ steps.deploy.outputs.staticWebAppName }}
       staticWebAppUrl: ${{ steps.deploy.outputs.staticWebAppUrl }}
-      
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -110,10 +109,33 @@ jobs:
         echo "resourceGroupName=$(echo $DEPLOYMENT_OUTPUT | jq -r '.resourceGroupName.value')" >> $GITHUB_OUTPUT
         echo "staticWebAppName=$(echo $DEPLOYMENT_OUTPUT | jq -r '.staticWebAppName.value')" >> $GITHUB_OUTPUT
         echo "staticWebAppUrl=$(echo $DEPLOYMENT_OUTPUT | jq -r '.staticWebAppUrl.value')" >> $GITHUB_OUTPUT
+        echo "functionAppName=$(echo $DEPLOYMENT_OUTPUT | jq -r '.functionAppName.value')" >> $GITHUB_OUTPUT
+
+  deploy-function-app:
+    runs-on: ubuntu-latest
+    needs: [build-backend, deploy-infrastructure]
+    
+    steps:
+    - name: Download API artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: api-package
+        path: ./api-dist
+        
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Deploy to Azure Function App
+      uses: Azure/functions-action@v1
+      with:
+        app-name: ${{ needs.deploy-infrastructure.outputs.functionAppName }}
+        package: ./api-dist
 
   deploy-static-web-app:
     runs-on: ubuntu-latest
-    needs: [build-backend, build-frontend, deploy-infrastructure]
+    needs: [build-frontend, deploy-infrastructure, deploy-function-app]
     
     steps:
     - name: Checkout code
@@ -124,12 +146,6 @@ jobs:
       with:
         name: frontend-package
         path: ./frontend-dist
-        
-    - name: Download API artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: api-package
-        path: ./api-dist
         
     - name: Azure Login
       uses: azure/login@v2
@@ -153,12 +169,8 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         action: "upload"
         app_location: "./frontend-dist"
-        api_location: "./api-dist"
         output_location: "."
         skip_app_build: true
-        skip_api_build: true
-      env:
-        SWA_CLI_DEBUG: 'silly'
           
     - name: Deployment Summary
       run: |
@@ -167,10 +179,11 @@ jobs:
         echo "- **Tag**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Resource Group**: ${{ needs.deploy-infrastructure.outputs.resourceGroupName }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Static Web App URL**: ${{ needs.deploy-infrastructure.outputs.staticWebAppUrl }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Function App**: ${{ needs.deploy-infrastructure.outputs.functionAppName }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Environment**: Production" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Architecture" >> $GITHUB_STEP_SUMMARY
-        echo "Using Azure Static Web Apps with managed functions (Free tier)" >> $GITHUB_STEP_SUMMARY
+        echo "Using Azure Static Web Apps (Standard) with linked Azure Function App" >> $GITHUB_STEP_SUMMARY
 
   create-release:
     runs-on: ubuntu-latest
