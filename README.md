@@ -17,7 +17,7 @@ Why the fuck not?
 - **Infrastructure**: Azure Static Web Apps + Azure Functions + Azure Table Storage
 - **Deployment**: GitHub Actions + Bicep IaC
 - **Real-time**: Long Polling for state synchronization
-- **Storage**: ActorTableEntities v2.0.0 for actor-based table storage with blob locking
+- **Storage**: ActorTableEntities v2.1.0 for actor-based table storage with blob locking
 - **Local Development**: Azure Static Web Apps CLI
 
 ## Prerequisites

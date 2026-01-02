@@ -48,6 +48,9 @@ project.fragment.lock.json
 artifacts/
 **/Properties/launchSettings.json
 
+# Build output directories
+api-output/
+
 *_i.c
 *_p.c
 *_i.h
