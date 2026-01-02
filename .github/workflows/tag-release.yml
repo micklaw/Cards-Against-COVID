@@ -128,38 +128,12 @@ jobs:
       uses: azure/login@v2
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Create deployment package
-      run: |
-        cd ./api-dist
-        zip -r ../deploy.zip .
-        cd ..
         
-    - name: Deploy to Azure Function App (Flex Consumption)
-      run: |
-        # Get storage account key
-        STORAGE_KEY=$(az storage account keys list \
-          --account-name ${{ needs.deploy-infrastructure.outputs.storageAccountName }} \
-          --resource-group ${{ needs.deploy-infrastructure.outputs.resourceGroupName }} \
-          --query '[0].value' -o tsv)
-        
-        # Upload to blob storage
-        TIMESTAMP=$(date +%Y%m%d%H%M%S)
-        BLOB_NAME="deployment-$TIMESTAMP.zip"
-        
-        az storage blob upload \
-          --account-name ${{ needs.deploy-infrastructure.outputs.storageAccountName }} \
-          --account-key "$STORAGE_KEY" \
-          --container-name deployments \
-          --name $BLOB_NAME \
-          --file ./deploy.zip \
-          --overwrite
-        
-        # Deploy to function app
-        az functionapp deployment source config-zip \
-          --resource-group ${{ needs.deploy-infrastructure.outputs.resourceGroupName }} \
-          --name ${{ needs.deploy-infrastructure.outputs.functionAppName }} \
-          --src ./deploy.zip
+    - name: Deploy to Azure Function App
+      uses: Azure/functions-action@v1
+      with:
+        app-name: ${{ needs.deploy-infrastructure.outputs.functionAppName }}
+        package: ./api-dist
 
   deploy-static-web-app:
     runs-on: ubuntu-latest
