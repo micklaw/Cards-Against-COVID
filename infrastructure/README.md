@@ -84,15 +84,35 @@ Add the following secrets to your GitHub repository:
      --scopes /subscriptions/{subscription-id} \
      --json-auth
    ```
+   
+   The output should look like:
+   ```json
+   {
+     "clientId": "<GUID>",
+     "clientSecret": "<STRING>",
+     "subscriptionId": "<GUID>",
+     "tenantId": "<GUID>"
+   }
+   ```
 
 2. **RESOURCE_GROUP_NAME** (Optional): Name of the resource group to create
    - Default: `rg-cards-against-covid`
+   - Example: `rg-my-game-prod`
 
 3. **LOCATION** (Optional): Azure region for deployment
    - Default: `eastus`
+   - Example: `westus2`, `northeurope`, etc.
 
 4. **AZURE_SUBSCRIPTION_ID** (Optional): Azure subscription ID
    - Used for validation and logging
+   - Can be found in the AZURE_CREDENTIALS JSON
+
+#### Using the deploy-to-azure.yml Workflow
+
+The workflow can be triggered in two ways:
+
+1. **Automatic**: Pushes to `main` or `master` branches automatically deploy to dev environment
+2. **Manual**: Use the "Run workflow" button in GitHub Actions tab to deploy to a specific environment (dev, staging, or prod)
 
 ## Parameters
 
