@@ -16,6 +16,9 @@ param functionAppSku string = 'Y1'
 @description('Function App SKU Family')
 param functionAppSkuFamily string = 'Y'
 
+@description('Static Web App SKU (Free or Standard)')
+param staticWebAppSku string = 'Free'
+
 var uniqueSuffix = uniqueString(resourceGroup().id)
 var storageAccountName = '${baseName}storage${uniqueSuffix}'
 var functionAppName = '${baseName}-func-${environmentName}-${uniqueSuffix}'
@@ -109,8 +112,8 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
   name: staticWebAppName
   location: location
   sku: {
-    name: 'Free'
-    tier: 'Free'
+    name: staticWebAppSku
+    tier: staticWebAppSku
   }
   properties: {
     repositoryUrl: ''

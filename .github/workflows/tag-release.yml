@@ -106,6 +106,7 @@ jobs:
           --parameters storageAccountSku=Standard_LRS \
           --parameters functionAppSku=Y1 \
           --parameters functionAppSkuFamily=Y \
+          --parameters staticWebAppSku=Standard \
           --query 'properties.outputs' \
           --output json)
         

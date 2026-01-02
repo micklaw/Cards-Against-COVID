@@ -21,6 +21,9 @@ param functionAppSku string = 'Y1'
 @description('Function App SKU Family')
 param functionAppSkuFamily string = 'Y'
 
+@description('Static Web App SKU (Free or Standard)')
+param staticWebAppSku string = 'Free'
+
 // Create the resource group
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
@@ -43,6 +46,7 @@ module infrastructure 'main.bicep' = {
     storageAccountSku: storageAccountSku
     functionAppSku: functionAppSku
     functionAppSkuFamily: functionAppSkuFamily
+    staticWebAppSku: staticWebAppSku
   }
 }
 
