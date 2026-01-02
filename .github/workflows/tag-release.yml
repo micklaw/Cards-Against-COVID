@@ -32,13 +32,12 @@ jobs:
       working-directory: ./api
       run: dotnet restore
       
-    - name: Build solution
-      working-directory: ./api
-      run: dotnet build --configuration Release --no-restore
-      
     - name: Publish API
       working-directory: ./api
       run: dotnet publish CardsAgainstHumanity.Api/CardsAgainstHumanity.Api.csproj --configuration Release --output ../api-output
+      
+    - name: List published files
+      run: ls -la ./api-output
       
     - name: Upload API artifact
       uses: actions/upload-artifact@v4

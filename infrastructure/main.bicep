@@ -14,6 +14,8 @@ var storageAccountName = '${baseName}storage${environmentName}'
 var staticWebAppName = '${baseName}-swa-${environmentName}'
 var functionAppName = '${baseName}-func-${environmentName}'
 var appServicePlanName = '${baseName}-asp-${environmentName}'
+var logAnalyticsName = '${baseName}-log-${environmentName}'
+var appInsightsName = '${baseName}-ai-${environmentName}'
 
 // Storage Account
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
@@ -37,6 +39,31 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
 resource tableService 'Microsoft.Storage/storageAccounts/tableServices@2023-05-01' = {
   parent: storageAccount
   name: 'default'
+}
+
+// Log Analytics Workspace
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
+  name: logAnalyticsName
+  location: location
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: 30
+  }
+}
+
+// Application Insights
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: appInsightsName
+  location: location
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: logAnalytics.id
+    publicNetworkAccessForIngestion: 'Enabled'
+    publicNetworkAccessForQuery: 'Enabled'
+  }
 }
 
 // App Service Plan (Consumption - Windows)
@@ -92,8 +119,12 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
           value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
         }
         {
-          name: 'WEBSITE_RUN_FROM_PACKAGE'
+          name: 'WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED'
           value: '1'
+        }
+        {
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: appInsights.properties.ConnectionString
         }
       ]
     }
@@ -132,3 +163,5 @@ output staticWebAppUrl string = 'https://${staticWebApp.properties.defaultHostna
 output staticWebAppDeploymentToken string = staticWebApp.listSecrets().properties.apiKey
 output functionAppName string = functionApp.name
 output functionAppUrl string = 'https://${functionApp.properties.defaultHostName}'
+output appInsightsConnectionString string = appInsights.properties.ConnectionString
+output appInsightsInstrumentationKey string = appInsights.properties.InstrumentationKey
