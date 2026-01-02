@@ -58,6 +58,8 @@ resource staticWebAppSettings 'Microsoft.Web/staticSites/config@2023-12-01' = {
   name: 'appsettings'
   properties: {
     AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+    FUNCTIONS_WORKER_RUNTIME: 'dotnet-isolated'
+    TableStorageConnectionString: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
   }
 }
 
