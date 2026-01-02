@@ -157,9 +157,6 @@ jobs:
         output_location: "."
         skip_app_build: true
         skip_api_build: true
-      env:
-        AZURE_FUNCTIONS_API_LANGUAGE: dotnet-isolated
-        AZURE_FUNCTIONS_API_VERSION: "8.0"
           
     - name: Deployment Summary
       run: |
