@@ -10,11 +10,10 @@ param baseName string = 'cah'
 @description('Storage account SKU')
 param storageAccountSku string = 'Standard_LRS'
 
-var uniqueSuffix = uniqueString(resourceGroup().id)
-var storageAccountName = '${baseName}storage${uniqueSuffix}'
-var staticWebAppName = '${baseName}-swa-${environmentName}-${uniqueSuffix}'
-var functionAppName = '${baseName}-func-${environmentName}-${uniqueSuffix}'
-var appServicePlanName = '${baseName}-asp-${environmentName}-${uniqueSuffix}'
+var storageAccountName = '${baseName}storage${environmentName}'
+var staticWebAppName = '${baseName}-swa-${environmentName}'
+var functionAppName = '${baseName}-func-${environmentName}'
+var appServicePlanName = '${baseName}-asp-${environmentName}'
 
 // Storage Account
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
