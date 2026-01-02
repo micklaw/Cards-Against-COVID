@@ -80,6 +80,7 @@ jobs:
       functionAppName: ${{ steps.deploy.outputs.functionAppName }}
       staticWebAppName: ${{ steps.deploy.outputs.staticWebAppName }}
       staticWebAppUrl: ${{ steps.deploy.outputs.staticWebAppUrl }}
+      storageAccountName: ${{ steps.deploy.outputs.storageAccountName }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
