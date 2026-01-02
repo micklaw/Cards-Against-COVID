@@ -92,12 +92,16 @@ jobs:
     - name: Deploy Bicep template at subscription level
       id: deploy
       run: |
+        LOCATION="${{ secrets.LOCATION || 'eastus' }}"
+        RESOURCE_GROUP="${{ secrets.RESOURCE_GROUP_NAME || 'rg-cards-against-covid' }}"
+        ENVIRONMENT="${{ github.event.inputs.environment || 'dev' }}"
+        
         DEPLOYMENT_OUTPUT=$(az deployment sub create \
-          --location ${{ secrets.LOCATION || 'eastus' }} \
+          --location "$LOCATION" \
           --template-file infrastructure/main-subscription.bicep \
-          --parameters resourceGroupName=${{ secrets.RESOURCE_GROUP_NAME || 'rg-cards-against-covid' }} \
-          --parameters location=${{ secrets.LOCATION || 'eastus' }} \
-          --parameters environmentName=${{ github.event.inputs.environment || 'dev' }} \
+          --parameters resourceGroupName="$RESOURCE_GROUP" \
+          --parameters location="$LOCATION" \
+          --parameters environmentName="$ENVIRONMENT" \
           --parameters baseName=cah \
           --parameters storageAccountSku=Standard_LRS \
           --parameters functionAppSku=Y1 \
