@@ -65,7 +65,23 @@ const GameTabs: React.FC = () => {
                 </a>
               );
             })}
-            <Link className="nav-link" to="/">New</Link>
+            <Link className="btn btn-primary btn-sm ml-4" to="/">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-4 h-4 mr-1"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4.5v15m7.5-7.5h-15"
+                />
+              </svg>
+              New
+            </Link>
           </nav>
         </div>
       </header>

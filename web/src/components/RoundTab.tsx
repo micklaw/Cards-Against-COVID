@@ -103,10 +103,38 @@ const RoundTab: React.FC = () => {
     );
   }
 
+  const ControlButtons = () => (
+    <div className="flex justify-center gap-2 flex-wrap">
+      {!currentRound.isWon && (
+        <>
+          <button type="button" className="btn btn-primary" onClick={handleNewPrompt}>
+            🔄 Change
+          </button>
+          <button type="button" className="btn btn-primary" onClick={handleNewRound}>
+            🔁 Restart
+          </button>
+          {currentRound.hasResponses && (
+            <button type="button" className="btn btn-success" onClick={handleReveal}>
+              🏆 Winner
+            </button>
+          )}
+        </>
+      )}
+      {currentRound.isWon && (
+        <button type="button" className="btn btn-primary" onClick={handleNext}>
+          ⏭️ Again?
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div className="mt-4">
+      {/* Controls panel - top */}
+      {partOfCurrentGame && <ControlButtons />}
+
       {/* Cards grid - prompt first, then responses */}
-      <div className="response-cards-container">
+      <div className="response-cards-container mt-6">
         <div className="response-cards-grid">
           {/* Prompt card */}
           <div className="response-card-item prompt-card">
@@ -166,43 +194,15 @@ const RoundTab: React.FC = () => {
         <p className="text-gray-500 dark:text-gray-400 text-center mt-4">No responses yet, hurry up</p>
       )}
 
-      {/* Controls panel - centered below cards */}
+      {/* Controls panel - bottom */}
       {partOfCurrentGame && (
-        <div className="flex justify-center mt-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-2xl w-full">
-            {!currentRound.isWon && (
-              <>
-                <p className="text-gray-500 dark:text-gray-400 italic mb-4 text-center">
-                  Change the prompt, or restart round.
-                </p>
-                <div className="flex justify-center gap-2 flex-wrap">
-                  <button type="button" className="btn btn-primary" onClick={handleNewPrompt}>
-                    🔄 Change
-                  </button>
-                  <button type="button" className="btn btn-primary" onClick={handleNewRound}>
-                    🔁 Restart
-                  </button>
-                  {currentRound.hasResponses && (
-                    <button type="button" className="btn btn-success" onClick={handleReveal}>
-                      🏆 Winner
-                    </button>
-                  )}
-                </div>
-                {!hasVoted && currentRound.hasResponses && (
-                  <p className="text-center mt-4 text-gray-500 dark:text-gray-400 text-sm">
-                    <i>Hover over cards to read them, click to vote</i>
-                  </p>
-                )}
-              </>
-            )}
-            {currentRound.isWon && (
-              <div className="flex justify-center">
-                <button type="button" className="btn btn-primary" onClick={handleNext}>
-                  ⏭️ Again?
-                </button>
-              </div>
-            )}
-          </div>
+        <div className="mt-8">
+          <ControlButtons />
+          {!hasVoted && currentRound.hasResponses && !currentRound.isWon && (
+            <p className="text-center mt-4 text-gray-500 dark:text-gray-400 text-sm">
+              <i>Hover over cards to read them, click to vote</i>
+            </p>
+          )}
         </div>
       )}
     </div>
