@@ -88,7 +88,7 @@ class GameApi {
 
   // Change prompt
   async newPrompt(gameUrl: string): Promise<Game> {
-    const response = await this.client.post<Game>(`/game/${gameUrl}/round/prompt`);
+    const response = await this.client.post<Game>(`/game/${gameUrl}/round/prompt/new`);
     return response.data;
   }
 

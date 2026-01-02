@@ -16,9 +16,17 @@ const StatsTab: React.FC = () => {
   const roundCount = game.previousRounds.length + (game.currentRound ? 1 : 0);
   const isCreator = isGameCreator(game.url);
   
-  const overallWinner = game.score && Object.keys(game.score).length > 0
+  // Compute scores from previous rounds (same logic as backend)
+  const computedScores = game.previousRounds
+    .filter(r => r.wonBy > 0)
+    .reduce((acc, round) => {
+      acc[round.wonBy] = (acc[round.wonBy] || 0) + 1;
+      return acc;
+    }, {} as Record<number, number>);
+  
+  const overallWinner = Object.keys(computedScores).length > 0
     ? game.players.find(p => p.id === parseInt(
-        Object.entries(game.score).sort((a, b) => b[1] - a[1])[0][0]
+        Object.entries(computedScores).sort((a, b) => b[1] - a[1])[0][0]
       ))
     : null;
 
@@ -52,7 +60,7 @@ const StatsTab: React.FC = () => {
       <h5 className="font-bold text-lg mb-2">Rounds</h5>
       <p className="mb-4">{roundCount}</p>
 
-      <h5 className="font-bold text-lg mb-2">Scores</h5>
+      <h5 className="font-bold text-lg mb-2">Leaderboard</h5>
       {game.players && game.players.length > 0 ? (
         <table className="game-table mb-4 rounded-lg overflow-hidden">
           <thead>
@@ -63,7 +71,7 @@ const StatsTab: React.FC = () => {
           </thead>
           <tbody>
             {game.players.map(player => {
-              const score = game.score?.[player.id] || 0;
+              const score = computedScores[player.id] || 0;
               return (
                 <tr key={player.id}>
                   <td className="text-left">{player.name}</td>

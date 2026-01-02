@@ -41,6 +41,11 @@ namespace CardsAgainstHumanity.Api.Entities
         [ActorTableEntityComplexProperty]
         public IList<Round> PreviousRounds { get; set; } = new List<Round>();
 
+        public Dictionary<int, int> Score => PreviousRounds
+            .Where(r => r.WonBy > 0)
+            .GroupBy(r => r.WonBy)
+            .ToDictionary(g => g.Key, g => g.Count());
+
         public bool IsOpen { get; set; } = true;
 
         public bool IsOver { get; set; }

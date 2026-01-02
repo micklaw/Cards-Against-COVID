@@ -640,6 +640,7 @@
   /* Response Card Info */
   .response-card-info {
     @apply mt-3 text-center;
+    min-height: 3rem;
     transition: opacity 0.3s ease;
   }
 }
