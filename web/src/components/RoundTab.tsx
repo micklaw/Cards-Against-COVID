@@ -10,7 +10,6 @@ import {
   vote
 } from '../store/gameSlice';
 import Card, { CardType } from './Card';
-import '../styles/RoundTab.css';
 
 const RoundTab: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -91,45 +90,42 @@ const RoundTab: React.FC = () => {
 
   if (!currentRound) {
     return (
-      <div className="mt-2">
-        <p>No fun has begun</p>
+      <div className="mt-4">
+        <p className="mb-4 text-gray-600 dark:text-gray-300">No fun has begun</p>
         {partOfCurrentGame && (
-          <form>
-            <div className="form-group">
-              <button type="button" className="btn btn-primary" onClick={handleNewRound}>
-                New Round
-              </button>
-            </div>
-          </form>
+          <div className="mb-4">
+            <button type="button" className="btn btn-primary" onClick={handleNewRound}>
+              New Round
+            </button>
+          </div>
         )}
       </div>
     );
   }
 
   return (
-    <div className="mt-2">
-      <div className="mt-2">
+    <div className="mt-4">
+      <div className="mt-4">
         <Card type={CardType.Prompt} text={currentRound.prompt} />
       </div>
 
       {partOfCurrentGame && (
         <>
-          <p><i>Change the prompt, or restart round.</i></p>
-          <form>
-            <div className="form-group">
-              <button type="button" className="btn btn-primary" onClick={handleNewPrompt}>
-                Change card
-              </button>
-              {' '}
-              <button type="button" className="btn btn-primary" onClick={handleNewRound}>
-                Restart round
-              </button>
-            </div>
-          </form>
+          <p className="text-gray-500 dark:text-gray-400 italic mb-4">
+            Change the prompt, or restart round.
+          </p>
+          <div className="flex gap-2 mb-6">
+            <button type="button" className="btn btn-primary" onClick={handleNewPrompt}>
+              Change card
+            </button>
+            <button type="button" className="btn btn-primary" onClick={handleNewRound}>
+              Restart round
+            </button>
+          </div>
         </>
       )}
 
-      <h5 className="font-weight-bold">Responses</h5>
+      <h5 className="font-bold text-lg mb-4">Responses</h5>
 
       {currentRound.hasResponses ? (
         <>
@@ -199,27 +195,22 @@ const RoundTab: React.FC = () => {
           )}
 
           {partOfCurrentGame && (
-            <form>
-              <div className="form-group">
-                {!currentRound.isWon && currentRound.hasResponses && (
-                  <button type="button" className="btn btn-primary" onClick={handleReveal}>
-                    Reveal winner
-                  </button>
-                )}
-                {currentRound.isWon && (
-                  <>
-                    {' '}
-                    <button type="button" className="btn btn-primary" onClick={handleNext}>
-                      Next round
-                    </button>
-                  </>
-                )}
-              </div>
-            </form>
+            <div className="flex gap-2 mt-4">
+              {!currentRound.isWon && currentRound.hasResponses && (
+                <button type="button" className="btn btn-primary" onClick={handleReveal}>
+                  Reveal winner
+                </button>
+              )}
+              {currentRound.isWon && (
+                <button type="button" className="btn btn-primary" onClick={handleNext}>
+                  Next round
+                </button>
+              )}
+            </div>
           )}
         </>
       ) : (
-        <p>No responses yet, hurry up</p>
+        <p className="text-gray-500 dark:text-gray-400">No responses yet, hurry up</p>
       )}
     </div>
   );

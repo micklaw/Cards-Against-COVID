@@ -49,59 +49,56 @@ const CardsTab: React.FC = () => {
 
   if (!currentPlayer) {
     return (
-      <div className="mt-2">
-        <p>You nosey bastard you!</p>
-        <form>
-          <div className="form-group">
-            <a href="/">Away and find some of your own mates</a>
-          </div>
-        </form>
+      <div className="mt-4">
+        <p className="mb-4 text-gray-600 dark:text-gray-300">You nosey bastard you!</p>
+        <div className="mb-4">
+          <a href="/" className="text-primary hover:underline">
+            Away and find some of your own mates
+          </a>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mt-2">
+    <div className="mt-4">
       {currentPlayer.cards && currentPlayer.cards.length > 0 && (
-        <ul className="list-unstyled justify-content-center">
+        <ul className="list-none p-0 flex flex-wrap justify-center">
           {currentPlayer.cards.map((card, index) => (
             <li key={index} className="response-list">
               <Card type={CardType.Response} text={card} />
-              <form>
-                <div className="form-group">
-                  {!currentResponses.includes(index) && !selectedResponses.includes(index) ? (
-                    <>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-primary"
-                        onClick={() => handleToggle(index)}
-                      >
-                        Select
-                      </button>
-                      {' '}
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-primary"
-                        onClick={() => handleReplace(index)}
-                      >
-                        Replace
-                      </button>
-                    </>
-                  ) : selectedResponses.includes(index) ? (
+              <div className="flex gap-2 justify-center mt-2">
+                {!currentResponses.includes(index) && !selectedResponses.includes(index) ? (
+                  <>
                     <button
                       type="button"
-                      className="btn btn-sm btn-warning"
+                      className="btn btn-sm btn-primary"
                       onClick={() => handleToggle(index)}
                     >
-                      Undo
+                      Select
                     </button>
-                  ) : (
-                    <button type="button" className="btn btn-sm btn-info" disabled>
-                      Played
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-primary"
+                      onClick={() => handleReplace(index)}
+                    >
+                      Replace
                     </button>
-                  )}
-                </div>
-              </form>
+                  </>
+                ) : selectedResponses.includes(index) ? (
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-warning"
+                    onClick={() => handleToggle(index)}
+                  >
+                    Undo
+                  </button>
+                ) : (
+                  <button type="button" className="btn btn-sm btn-info" disabled>
+                    Played
+                  </button>
+                )}
+              </div>
             </li>
           ))}
         </ul>
@@ -109,35 +106,29 @@ const CardsTab: React.FC = () => {
 
       {currentResponses.length === 0 && selectedResponses.length === 0 && (
         <>
-          <p><i>Replace all cards?</i></p>
-          <form>
-            <div className="form-group">
-              <button type="button" className="btn btn-primary" onClick={handleReplaceAll}>
-                Replace all
-              </button>
-            </div>
-          </form>
+          <p className="text-gray-500 dark:text-gray-400 italic mb-4">Replace all cards?</p>
+          <div className="mb-4">
+            <button type="button" className="btn btn-primary" onClick={handleReplaceAll}>
+              Replace all
+            </button>
+          </div>
         </>
       )}
 
       {currentResponses.length > 0 && selectedResponses.length === 0 && (
-        <form>
-          <div className="form-group">
-            <button type="button" className="btn btn-primary" onClick={handleResetResponse}>
-              Reset response
-            </button>
-          </div>
-        </form>
+        <div className="mb-4">
+          <button type="button" className="btn btn-primary" onClick={handleResetResponse}>
+            Reset response
+          </button>
+        </div>
       )}
 
       {selectedResponses.length > 0 && (
-        <form>
-          <div className="form-group">
-            <button type="button" className="btn btn-primary" onClick={handleResponse}>
-              Respond
-            </button>
-          </div>
-        </form>
+        <div className="mb-4">
+          <button type="button" className="btn btn-primary" onClick={handleResponse}>
+            Respond
+          </button>
+        </div>
       )}
     </div>
   );

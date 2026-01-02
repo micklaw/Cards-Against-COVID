@@ -6,6 +6,7 @@ import GameTab from './GameTab';
 import StatsTab from './StatsTab';
 import RoundTab from './RoundTab';
 import CardsTab from './CardsTab';
+import ThemeToggle from './ThemeToggle';
 import { Link } from 'react-router';
 
 interface NavTab {
@@ -39,8 +40,11 @@ const GameTabs: React.FC = () => {
     <>
       <header className="masthead mb-auto">
         <div className="inner">
-          <h3 className="masthead-brand">{game.name}</h3>
-          <nav className="nav nav-masthead justify-content-center">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="masthead-brand">{game.name}</h3>
+            <ThemeToggle />
+          </div>
+          <nav className="nav-masthead">
             {tabs.map(tab => {
               // Hide Cards tab if not part of game or game is over
               if (tab.tab === Tab.Cards && (!partOfCurrentGame || game.isOver)) {
@@ -68,7 +72,7 @@ const GameTabs: React.FC = () => {
 
       <main role="main" className="inner cover">
         {tabs.map(tab => (
-          <GameTab key={tab.tab} className={tab.active ? '' : 'd-none'}>
+          <GameTab key={tab.tab} className={tab.active ? '' : 'hidden'}>
             {tab.tab === Tab.Stats && <StatsTab />}
             {tab.tab === Tab.Round && <RoundTab />}
             {tab.tab === Tab.Cards && <CardsTab />}

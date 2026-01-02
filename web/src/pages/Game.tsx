@@ -53,7 +53,7 @@ const Game: React.FC = () => {
     return (
       <div className="aligner">
         <main role="main" className="inner cover">
-          <span className="blink">
+          <span className="blink text-gray-600 dark:text-gray-300">
             Loading{fetching && <span>.</span>}
           </span>
         </main>

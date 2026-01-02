@@ -13,13 +13,11 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ type, text }) => {
-  const className = type === CardType.Prompt 
-    ? 'card text-white black-bg' 
-    : 'card white-bg';
-
+  const isPrompt = type === CardType.Prompt;
+  
   return (
-    <div className={`shadow ${className} mb-3`}>
-      <div className="card-body text-left">
+    <div className={`game-card shadow-lg mb-3 ${isPrompt ? 'black-bg' : 'white-bg'}`}>
+      <div className="card-body">
         <h5 className="card-title">{text}</h5>
       </div>
     </div>
