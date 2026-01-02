@@ -277,28 +277,41 @@
   
   /* Card Stack Container */
   .card-stack-container {
-    @apply w-full py-8 my-8;
+    @apply w-full;
     @apply min-h-[500px];
-    @apply flex justify-center items-center;
+    @apply flex justify-center lg:justify-start items-start;
   }
   
   .card-stack {
     @apply relative w-full max-w-4xl h-[500px];
-    @apply flex justify-center items-center;
+    @apply flex justify-center lg:justify-start items-start;
   }
   
   /* Individual Card Stack Item */
   .card-stack-item {
-    @apply absolute left-1/2 top-1/2;
+    @apply absolute left-1/2 top-0;
     @apply cursor-pointer;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: var(--z-index, 0);
   }
   
+  @media (min-width: 1024px) {
+    .card-stack-item {
+      @apply left-0;
+      transform: translateX(0);
+    }
+  }
+  
   /* Default stacked position */
   .card-stack-item:not(.hovered):not(.winner):not(.selected) {
-    transform: translate(calc(-50% + calc(var(--card-index) * 40px)), -50%);
+    transform: translateX(calc(-50% + calc(var(--card-index) * 40px)));
+  }
+  
+  @media (min-width: 1024px) {
+    .card-stack-item:not(.hovered):not(.winner):not(.selected) {
+      transform: translateX(calc(var(--card-index) * 40px));
+    }
   }
   
   .card-stack-item:not(.hovered):not(.winner):not(.selected) .card-stack-content {
@@ -336,8 +349,14 @@
   
   /* Hovered state */
   .card-stack-item.hovered {
-    transform: translate(-50%, -70%) scale(1.1);
+    transform: translateX(-50%) translateY(-20px);
     z-index: 100 !important;
+  }
+  
+  @media (min-width: 1024px) {
+    .card-stack-item.hovered {
+      transform: translateX(0) translateY(-20px);
+    }
   }
   
   .card-stack-item.hovered .card-stack-content {
@@ -348,8 +367,14 @@
   
   /* Selected state */
   .card-stack-item.selected {
-    transform: translate(-50%, -60%) scale(1.05);
+    transform: translateX(-50%) translateY(-10px);
     z-index: 101 !important;
+  }
+  
+  @media (min-width: 1024px) {
+    .card-stack-item.selected {
+      transform: translateX(0) translateY(-10px);
+    }
   }
   
   .card-stack-item.selected .game-card {
@@ -359,9 +384,15 @@
   
   /* Winner state */
   .card-stack-item.winner {
-    transform: translate(-50%, -50%) scale(1.15);
+    transform: translateX(-50%);
     z-index: 200 !important;
     animation: winnerPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  @media (min-width: 1024px) {
+    .card-stack-item.winner {
+      transform: translateX(0);
+    }
   }
   
   .card-stack-item.winner .game-card {
@@ -371,15 +402,31 @@
   
   @keyframes winnerPop {
     0% {
-      transform: translate(-50%, -50%) scale(0.8);
+      transform: translateX(-50%) scale(0.8);
       opacity: 0;
     }
     50% {
-      transform: translate(-50%, -50%) scale(1.25);
+      transform: translateX(-50%) scale(1.1);
     }
     100% {
-      transform: translate(-50%, -50%) scale(1.15);
+      transform: translateX(-50%) scale(1);
       opacity: 1;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    @keyframes winnerPop {
+      0% {
+        transform: translateX(0) scale(0.8);
+        opacity: 0;
+      }
+      50% {
+        transform: translateX(0) scale(1.1);
+      }
+      100% {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+      }
     }
   }
   
@@ -462,7 +509,7 @@
   }
   
   .card-stack-item:not(.hovered):not(.winner):not(.selected) {
-    transform: translate(calc(-50% + calc(var(--card-index) * 25px)), -50%);
+    transform: translateX(calc(-50% + calc(var(--card-index) * 25px)));
   }
   
   .game-card {
@@ -475,11 +522,11 @@
   }
   
   .card-stack-item.hovered {
-    transform: translate(-50%, -65%) scale(1.05);
+    transform: translateX(-50%) translateY(-20px);
   }
   
   .card-stack-item.winner {
-    transform: translate(-50%, -50%) scale(1.1);
+    transform: translateX(-50%);
   }
 }
 
@@ -493,7 +540,7 @@
   }
   
   .card-stack-item:not(.hovered):not(.winner):not(.selected) {
-    transform: translate(calc(-50% + calc(var(--card-index) * 20px)), -50%);
+    transform: translateX(calc(-50% + calc(var(--card-index) * 20px)));
   }
   
   .game-card {

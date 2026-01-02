@@ -66,7 +66,7 @@ const StatsTab: React.FC = () => {
               const score = game.score?.[player.id] || 0;
               return (
                 <tr key={player.id}>
-                  <td>{player.name}</td>
+                  <td className="text-left">{player.name}</td>
                   <td className="text-right">{score}</td>
                 </tr>
               );
@@ -114,7 +114,7 @@ const StatsTab: React.FC = () => {
               </div>
             )}
             {isCreator && (
-              <div className="flex gap-2 mt-4">
+              <div className="flex justify-center gap-2 mt-4">
                 {!game.isOpen ? (
                   <button type="button" className="btn btn-secondary" onClick={handleOpen} title="Open the game">
                     🔒 Closed
