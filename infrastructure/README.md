@@ -117,14 +117,14 @@ Add the following secrets to your GitHub repository:
 
 The workflow can be triggered in two ways:
 
-1. **Automatic**: Pushes to `main` or `master` branches automatically deploy to dev environment
-2. **Manual**: Use the "Run workflow" button in GitHub Actions tab to deploy to a specific environment (dev, staging, or prod)
+1. **Automatic**: Pushes to `main` or `master` branches automatically deploy to production environment
+2. **Manual**: Use the "Run workflow" button in GitHub Actions tab to manually trigger deployment
 
 ## Parameters
 
 Edit `parameters.json` to customize the deployment:
 
-- `environmentName`: Environment identifier (dev, staging, prod)
+- `environmentName`: Environment identifier (e.g., prod, live)
 - `baseName`: Base name for all resources
 - `storageAccountSku`: Storage account SKU (Standard_LRS, Standard_GRS, etc.)
 - `functionAppSku`: Function App SKU (Y1 for consumption)

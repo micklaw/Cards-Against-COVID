@@ -6,16 +6,6 @@ on:
       - main
       - master
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy to'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-          - dev
-          - staging
-          - prod
 
 env:
   DOTNET_VERSION: '8.0.x'
@@ -94,14 +84,13 @@ jobs:
       run: |
         LOCATION="${{ secrets.LOCATION || 'eastus' }}"
         RESOURCE_GROUP="${{ secrets.RESOURCE_GROUP_NAME || 'rg-cards-against-covid' }}"
-        ENVIRONMENT="${{ github.event.inputs.environment || 'dev' }}"
         
         DEPLOYMENT_OUTPUT=$(az deployment sub create \
           --location "$LOCATION" \
           --template-file infrastructure/main-subscription.bicep \
           --parameters resourceGroupName="$RESOURCE_GROUP" \
           --parameters location="$LOCATION" \
-          --parameters environmentName="$ENVIRONMENT" \
+          --parameters environmentName=prod \
           --parameters baseName=cah \
           --parameters storageAccountSku=Standard_LRS \
           --parameters functionAppSku=Y1 \
@@ -181,4 +170,4 @@ jobs:
         echo "- **Resource Group**: ${{ needs.deploy-infrastructure.outputs.resourceGroupName }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Static Web App URL**: ${{ needs.deploy-infrastructure.outputs.staticWebAppUrl }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Function App**: ${{ needs.deploy-infrastructure.outputs.functionAppName }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Environment**: ${{ github.event.inputs.environment || 'dev' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Environment**: Production" >> $GITHUB_STEP_SUMMARY

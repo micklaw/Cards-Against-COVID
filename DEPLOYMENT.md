@@ -87,8 +87,7 @@ This will automatically deploy to the **dev** environment.
 1. Go to **Actions** tab in your GitHub repository
 2. Select **Deploy to Azure** workflow
 3. Click **Run workflow** button
-4. Choose the environment (dev, staging, or prod)
-5. Click **Run workflow**
+4. Click **Run workflow** to start the deployment
 
 ### 4. Monitor Deployment
 
@@ -121,15 +120,6 @@ To deploy to a different resource group:
 To deploy to a different region:
 1. Update the `LOCATION` secret in GitHub
 2. Trigger a new deployment
-
-### Deploy to Multiple Environments
-
-You can use the workflow_dispatch trigger to deploy to different environments:
-- **dev**: Development environment
-- **staging**: Staging/QA environment
-- **prod**: Production environment
-
-Each environment uses the same resource group but can be distinguished by the `environmentName` parameter in the Bicep template.
 
 ## Troubleshooting
 
