@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resourceGroupName": {
+      "value": "rg-cards-against-covid"
+    },
+    "location": {
+      "value": "eastus"
+    },
+    "environmentName": {
+      "value": "dev"
+    },
+    "baseName": {
+      "value": "cah"
+    },
+    "storageAccountSku": {
+      "value": "Standard_LRS"
+    },
+    "functionAppSku": {
+      "value": "Y1"
+    },
+    "functionAppSkuFamily": {
+      "value": "Y"
+    }
+  }
+}

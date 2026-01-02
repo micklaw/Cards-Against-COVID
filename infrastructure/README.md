@@ -6,22 +6,50 @@ This directory contains Bicep templates for deploying the Cards Against COVID in
 
 The infrastructure includes:
 
-- **Azure Static Web App**: Hosts the Blazor WebAssembly UI
+- **Azure Static Web App**: Hosts the React UI
 - **Azure Functions**: Isolated (.NET 8.0) serverless backend API
 - **Azure Storage Account**: Stores game state in Azure Tables
-- **Azure SignalR Service**: Real-time communication for game updates
-- **Application Insights**: Application monitoring and telemetry
-- **Log Analytics**: Centralized logging
+
+## Deployment Approach
+
+This project supports two deployment approaches:
+
+### 1. Subscription-Level Deployment (Recommended)
+
+Uses `main-subscription.bicep` to deploy at subscription scope, which creates the resource group and all resources in a single deployment.
+
+### 2. Resource Group-Level Deployment
+
+Uses `main.bicep` to deploy resources to an existing resource group.
 
 ## Deployment
 
 ### Prerequisites
 
 - Azure CLI installed
-- Azure subscription
-- Resource group created
+- Azure subscription with appropriate permissions
+- Service Principal with Contributor role (for GitHub Actions)
 
-### Manual Deployment
+### Manual Deployment - Subscription Level (Recommended)
+
+```bash
+# Login to Azure
+az login
+
+# Deploy infrastructure at subscription level (creates resource group + resources)
+az deployment sub create \
+  --location eastus \
+  --template-file infrastructure/main-subscription.bicep \
+  --parameters resourceGroupName=rg-cards-against-covid \
+  --parameters location=eastus \
+  --parameters environmentName=dev \
+  --parameters baseName=cah \
+  --parameters storageAccountSku=Standard_LRS \
+  --parameters functionAppSku=Y1 \
+  --parameters functionAppSkuFamily=Y
+```
+
+### Manual Deployment - Resource Group Level
 
 ```bash
 # Login to Azure
@@ -39,7 +67,32 @@ az deployment group create \
 
 ### GitHub Actions Deployment
 
-The infrastructure is automatically deployed via GitHub Actions workflow when changes are pushed to the main branch. See `.github/workflows/release.yml` for details.
+The infrastructure is automatically deployed via GitHub Actions workflows:
+
+- **`deploy-to-azure.yml`**: New configurable deployment using subscription-level Bicep
+- **`release.yml`**: Existing deployment workflow for dev/staging
+- **`tag-release.yml`**: Production deployment on version tags
+
+#### Setup GitHub Secrets for deploy-to-azure.yml
+
+Add the following secrets to your GitHub repository:
+
+1. **AZURE_CREDENTIALS** (Required): Service Principal credentials in JSON format
+   ```bash
+   az ad sp create-for-rbac --name "github-cards-against-covid" \
+     --role contributor \
+     --scopes /subscriptions/{subscription-id} \
+     --json-auth
+   ```
+
+2. **RESOURCE_GROUP_NAME** (Optional): Name of the resource group to create
+   - Default: `rg-cards-against-covid`
+
+3. **LOCATION** (Optional): Azure region for deployment
+   - Default: `eastus`
+
+4. **AZURE_SUBSCRIPTION_ID** (Optional): Azure subscription ID
+   - Used for validation and logging
 
 ## Parameters
 
