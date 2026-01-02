@@ -18,17 +18,20 @@ The service principal allows GitHub Actions to authenticate with Azure and deplo
 # Login to Azure
 az login
 
-# Get your subscription ID
-az account show --query id -o tsv
+# Get your subscription ID (save this value)
+SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+echo "Your subscription ID is: $SUBSCRIPTION_ID"
 
 # Create service principal with contributor role at subscription level
-# Replace {subscription-id} with your actual subscription ID
+# The SUBSCRIPTION_ID from above will be automatically used
 az ad sp create-for-rbac \
   --name "github-cards-against-covid" \
   --role contributor \
-  --scopes /subscriptions/{subscription-id} \
+  --scopes /subscriptions/$SUBSCRIPTION_ID \
   --json-auth
 ```
+
+**Note**: If running commands separately, replace `$SUBSCRIPTION_ID` with your actual subscription ID from the first command.
 
 The output will look like this:
 ```json

@@ -79,11 +79,17 @@ Add the following secrets to your GitHub repository:
 
 1. **AZURE_CREDENTIALS** (Required): Service Principal credentials in JSON format
    ```bash
+   # First, get your subscription ID
+   SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+   
+   # Then create the service principal
    az ad sp create-for-rbac --name "github-cards-against-covid" \
      --role contributor \
-     --scopes /subscriptions/{subscription-id} \
+     --scopes /subscriptions/$SUBSCRIPTION_ID \
      --json-auth
    ```
+   
+   **Note**: Replace `$SUBSCRIPTION_ID` with your actual subscription ID if running commands separately.
    
    The output should look like:
    ```json
