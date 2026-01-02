@@ -40,29 +40,43 @@ resource tableService 'Microsoft.Storage/storageAccounts/tableServices@2023-05-0
   name: 'default'
 }
 
-// App Service Plan (Consumption)
+// App Service Plan (Consumption - Linux)
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: appServicePlanName
   location: location
   sku: {
     name: 'Y1'
     tier: 'Dynamic'
+    size: 'Y1'
+    family: 'Y'
+    capacity: 0
   }
+  kind: 'linux'
   properties: {
-    reserved: false
+    perSiteScaling: false
+    elasticScaleEnabled: false
+    maximumElasticWorkerCount: 1
+    isSpot: false
+    reserved: true // true = Linux
+    isXenon: false
+    hyperV: false
+    targetWorkerCount: 0
+    targetWorkerSizeId: 0
+    zoneRedundant: false
   }
 }
 
-// Azure Function App - .NET 8 Isolated
+// Azure Function App - .NET 8 Isolated (Linux)
 resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   name: functionAppName
   location: location
-  kind: 'functionapp'
+  kind: 'functionapp,linux'
   properties: {
     serverFarmId: appServicePlan.id
     httpsOnly: true
+    reserved: true // Must match the App Service Plan (true = Linux)
     siteConfig: {
-      netFrameworkVersion: 'v8.0'
+      linuxFxVersion: 'DOTNET-ISOLATED|8.0'
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
       appSettings: [
