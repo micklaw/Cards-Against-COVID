@@ -1,37 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.3.11222.16 d18.3
+VisualStudioVersion = 18.3.11222.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardsAgainstHumanity.Application", "CardsAgainstHumanity.Application\CardsAgainstHumanity.Application.csproj", "{A05F7262-F3D8-4656-A4E1-2ADE7730970C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardsAgainstHumanity.Api", "CardsAgainstHumanity.Api\CardsAgainstHumanity.Api.csproj", "{D8FC4973-8B14-4028-B9B3-13EC62D60FFA}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{76A5CF87-848A-46F5-AAE0-F9FAB86E995A}"
-	ProjectSection(SolutionItems) = preProject
-		.gitignore = .gitignore
-		Directory.Build.props = Directory.Build.props
-		NuGet.Config = NuGet.Config
-		README.md = README.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{C37A3EB3-254A-47C2-9C6A-5A6B7581A716}"
-	ProjectSection(SolutionItems) = preProject
-		Docs\1.home.JPG = Docs\1.home.JPG
-		Docs\10.view.JPG = Docs\10.view.JPG
-		Docs\11.voted.JPG = Docs\11.voted.JPG
-		Docs\12.winner.JPG = Docs\12.winner.JPG
-		Docs\13.leaderboard.JPG = Docs\13.leaderboard.JPG
-		Docs\14.game-over.JPG = Docs\14.game-over.JPG
-		Docs\2.entername.JPG = Docs\2.entername.JPG
-		Docs\3.playing.JPG = Docs\3.playing.JPG
-		Docs\4.cards.JPG = Docs\4.cards.JPG
-		Docs\5.cards-replce.JPG = Docs\5.cards-replce.JPG
-		Docs\6.respond.JPG = Docs\6.respond.JPG
-		Docs\7.new-round.JPG = Docs\7.new-round.JPG
-		Docs\8.prompt.JPG = Docs\8.prompt.JPG
-		Docs\9.locked.JPG = Docs\9.locked.JPG
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
