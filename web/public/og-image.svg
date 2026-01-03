@@ -1,0 +1,44 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f3460;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Black card on left -->
+  <rect x="150" y="165" width="280" height="300" rx="15" fill="#000000" stroke="#ffffff" stroke-width="3"/>
+  <text x="290" y="270" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#ffffff" text-anchor="middle">
+    Cards
+  </text>
+  <text x="290" y="330" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#ffffff" text-anchor="middle">
+    Against
+  </text>
+  <text x="290" y="390" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#e94560" text-anchor="middle">
+    COVID
+  </text>
+  
+  <!-- White card on right -->
+  <rect x="770" y="165" width="280" height="300" rx="15" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+  <text x="910" y="240" font-family="Arial, sans-serif" font-size="28" fill="#000000" text-anchor="middle">
+    Play online with
+  </text>
+  <text x="910" y="280" font-family="Arial, sans-serif" font-size="28" fill="#000000" text-anchor="middle">
+    friends during
+  </text>
+  <text x="910" y="320" font-family="Arial, sans-serif" font-size="28" fill="#000000" text-anchor="middle">
+    lockdown!
+  </text>
+  <text x="910" y="380" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#e94560" text-anchor="middle">
+    7k+ cards
+  </text>
+  
+  <!-- Tagline at bottom -->
+  <text x="600" y="560" font-family="Arial, sans-serif" font-size="24" fill="#ffffff" text-anchor="middle" opacity="0.8">
+    Free &amp; Open Source • No Downloads Required
+  </text>
+</svg>
