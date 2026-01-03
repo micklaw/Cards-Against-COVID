@@ -40,7 +40,7 @@ jobs:
       
     - name: Publish API
       working-directory: ./api
-      run: dotnet publish CardsAgainstHumanity.Api/CardsAgainstHumanity.Api.csproj --configuration Release --output ../api-output --no-build
+      run: dotnet publish CardsAgainstHumanity.Api/CardsAgainstHumanity.Api.csproj --configuration Release --output ../api-output
       
     - name: Install React dependencies
       working-directory: ./web
