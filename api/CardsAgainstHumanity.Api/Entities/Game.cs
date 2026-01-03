@@ -150,6 +150,18 @@ namespace CardsAgainstHumanity.Api.Entities
                 return this;
             }
 
+            // Calculate total cards needed
+            var totalCardsNeeded = lastRound.Responses
+                .Where(r => r.Responses != null)
+                .Sum(r => r.Responses.Count);
+
+            // Validate we have enough cards
+            if (newCards.Count < totalCardsNeeded)
+            {
+                // Log or handle insufficient cards - for now just return to avoid partial replacement
+                return this;
+            }
+
             // For each player who responded in the last round, replace their played cards
             foreach (var response in lastRound.Responses)
             {

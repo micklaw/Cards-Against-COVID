@@ -148,18 +148,8 @@ public class FunctionTriggers
         _logger.LogInformation("Next round for game: {GameName}", instance);
 
         return await Orchestrate(req, instance!, game => {
-            // Calculate how many cards need to be replaced
-            var cardCount = 0;
-            if (game.CurrentRound?.Responses != null)
-            {
-                foreach (var response in game.CurrentRound.Responses)
-                {
-                    if (response.Responses != null)
-                    {
-                        cardCount += response.Responses.Count;
-                    }
-                }
-            }
+            // Calculate how many cards need to be replaced using LINQ
+            var cardCount = game.CurrentRound?.Responses?.Sum(r => r.Responses?.Count ?? 0) ?? 0;
 
             // Generate new cards
             var newCards = _cardService.ShuffleResponses(cardCount);
