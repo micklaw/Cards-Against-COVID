@@ -1,4 +1,3 @@
-using System.Net;
 using ActorTableEntities;
 using CardsAgainstHumanity.Api.Entities;
 using CardsAgainstHumanity.Api.Extensions;
@@ -7,8 +6,9 @@ using CardsAgainstHumanity.Application.Extensions;
 using CardsAgainstHumanity.Application.Models.Api;
 using CardsAgainstHumanity.Application.Models.Requests;
 using CardsAgainstHumanity.Application.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 
 namespace CardsAgainstHumanity.Api;
@@ -38,31 +38,28 @@ public class FunctionTriggers
     }
 
     [Function(nameof(ReadStateTrigger))]
-    public async Task<HttpResponseData> ReadStateTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = RoutePrefix + "/read")] HttpRequestData req)
+    public async Task<IActionResult> ReadStateTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = RoutePrefix + "/read")] HttpRequest req,
+        string instance)
     {
-        var name = req.GetRouteValue("instance");
+        _logger.LogInformation("Reading game state for: {GameName}", instance);
 
-        _logger.LogInformation("Reading game state for: {GameName}", name);
-
-        var game = await _entityClient.Get<Game>("game", name);
+        var game = await _entityClient.Get<Game>("game", instance);
 
         if (game == null)
         {
-            return req.CreateResponse(HttpStatusCode.NotFound);
+            return new NotFoundResult();
         }
 
-        var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(game);
-        return response;
+        return new OkObjectResult(game);
     }
 
     [Function(nameof(PollTrigger))]
-    public async Task<HttpResponseData> PollTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = RoutePrefix + "/poll")] HttpRequestData req,
+    public async Task<IActionResult> PollTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = RoutePrefix + "/poll")] HttpRequest req,
+        string instance,
         CancellationToken cancellationToken)
     {
-        var name = req.GetRouteValue("instance");
         var versionStr = req.Query["version"];
         
         if (!int.TryParse(versionStr, out var currentVersion))
@@ -70,18 +67,16 @@ public class FunctionTriggers
             currentVersion = 0;
         }
 
-        _logger.LogInformation("Polling for game: {GameName}, current version: {Version}", name, currentVersion);
+        _logger.LogInformation("Polling for game: {GameName}, current version: {Version}", instance, currentVersion);
 
-        var result = await _pollingService.Poll(name!, currentVersion, cancellationToken);
+        var result = await _pollingService.Poll(instance!, currentVersion, cancellationToken);
 
-        var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(result);
-        return response;
+        return new OkObjectResult(result);
     }
 
     [Function(nameof(CreateTrigger))]
-    public async Task<HttpResponseData> CreateTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix)] HttpRequestData req)
+    public async Task<IActionResult> CreateTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix)] HttpRequest req)
     {
         var name = await req.ReadBodyParamAsync<string>("name");
 
@@ -91,57 +86,52 @@ public class FunctionTriggers
     }
 
     [Function(nameof(OpenTrigger))]
-    public async Task<HttpResponseData> OpenTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/open")] HttpRequestData req)
+    public async Task<IActionResult> OpenTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/open")] HttpRequest req,
+        string instance)
     {
-        var instance = req.GetRouteValue("instance");
-
         _logger.LogInformation("Opening game: {GameName}", instance);
 
         return await Orchestrate(req, instance!, game => game.Open());
     }
 
     [Function(nameof(CloseTrigger))]
-    public async Task<HttpResponseData> CloseTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/close")] HttpRequestData req)
+    public async Task<IActionResult> CloseTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/close")] HttpRequest req,
+        string instance)
     {
-        var instance = req.GetRouteValue("instance");
-
         _logger.LogInformation("Closing game: {GameName}", instance);
 
         return await Orchestrate(req, instance!, game => game.Close());
     }
 
     [Function(nameof(FinishTrigger))]
-    public async Task<HttpResponseData> FinishTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/finish")] HttpRequestData req)
+    public async Task<IActionResult> FinishTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/finish")] HttpRequest req,
+        string instance)
     {
-        var instance = req.GetRouteValue("instance");
-
         _logger.LogInformation("Finishing game: {GameName}", instance);
 
         return await Orchestrate(req, instance!, game => game.Finish());
     }
 
     [Function(nameof(RevealTrigger))]
-    public async Task<HttpResponseData> RevealTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/reveal")] HttpRequestData req)
+    public async Task<IActionResult> RevealTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/reveal")] HttpRequest req,
+        string instance)
     {
-        var instance = req.GetRouteValue("instance");
-
         _logger.LogInformation("Revealing round for game: {GameName}", instance);
 
         return await Orchestrate(req, instance!, game => game.RevealRound());
     }
 
     [Function(nameof(AddPlayerTrigger))]
-    public async Task<HttpResponseData> AddPlayerTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/add")] HttpRequestData req)
+    public async Task<IActionResult> AddPlayerTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/add")] HttpRequest req,
+        string instance)
     {
         var model = await req.ReadBodyAsync<AddPlayerModel>();
         model!.Responses = _cardService.ShuffleResponses();
-
-        var instance = req.GetRouteValue("instance");
 
         _logger.LogInformation("Adding player {PlayerName} to game: {GameName}", model.PlayerName, instance);
 
@@ -149,11 +139,11 @@ public class FunctionTriggers
     }
 
     [Function(nameof(NextRoundTrigger))]
-    public async Task<HttpResponseData> NextRoundTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/next")] HttpRequestData req)
+    public async Task<IActionResult> NextRoundTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/next")] HttpRequest req,
+        string instance)
     {
         var prompt = _cardService.GetPrompt();
-        var instance = req.GetRouteValue("instance");
 
         _logger.LogInformation("Next round for game: {GameName}", instance);
 
@@ -161,11 +151,11 @@ public class FunctionTriggers
     }
 
     [Function(nameof(NewRoundTrigger))]
-    public async Task<HttpResponseData> NewRoundTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/new")] HttpRequestData req)
+    public async Task<IActionResult> NewRoundTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/new")] HttpRequest req,
+        string instance)
     {
         var prompt = _cardService.GetPrompt();
-        var instance = req.GetRouteValue("instance");
 
         _logger.LogInformation("New round for game: {GameName}", instance);
 
@@ -173,11 +163,11 @@ public class FunctionTriggers
     }
 
     [Function(nameof(VoteTrigger))]
-    public async Task<HttpResponseData> VoteTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/vote")] HttpRequestData req)
+    public async Task<IActionResult> VoteTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/vote")] HttpRequest req,
+        string instance)
     {
         var model = await req.ReadBodyAsync<VoteModel>();
-        var instance = req.GetRouteValue("instance");
 
         _logger.LogInformation("Vote in game: {GameName}", instance);
 
@@ -185,11 +175,11 @@ public class FunctionTriggers
     }
 
     [Function(nameof(NewPromptTrigger))]
-    public async Task<HttpResponseData> NewPromptTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/prompt/new")] HttpRequestData req)
+    public async Task<IActionResult> NewPromptTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/prompt/new")] HttpRequest req,
+        string instance)
     {
         var prompt = _cardService.GetPrompt();
-        var instance = req.GetRouteValue("instance");
 
         _logger.LogInformation("New prompt for game: {GameName}", instance);
 
@@ -197,13 +187,12 @@ public class FunctionTriggers
     }
 
     [Function(nameof(ShufflePlayerCardsTrigger))]
-    public async Task<HttpResponseData> ShufflePlayerCardsTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/cards/shuffle")] HttpRequestData req)
+    public async Task<IActionResult> ShufflePlayerCardsTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/cards/shuffle")] HttpRequest req,
+        string instance)
     {
         var model = await req.ReadBodyAsync<ShufflePlayerCardsModel>();
         model!.Responses = _cardService.ShuffleResponses();
-
-        var instance = req.GetRouteValue("instance");
 
         _logger.LogInformation("Shuffling cards for game: {GameName}", instance);
 
@@ -211,13 +200,12 @@ public class FunctionTriggers
     }
 
     [Function(nameof(ReplacePlayerCardTrigger))]
-    public async Task<HttpResponseData> ReplacePlayerCardTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/card/replace")] HttpRequestData req)
+    public async Task<IActionResult> ReplacePlayerCardTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/player/card/replace")] HttpRequest req,
+        string instance)
     {
         var model = await req.ReadBodyAsync<ReplacePlayerCardRequest>();
         model!.Response = _cardService.ShuffleResponses(1).First();
-
-        var instance = req.GetRouteValue("instance");
 
         _logger.LogInformation("Replacing card for game: {GameName}", instance);
 
@@ -225,11 +213,11 @@ public class FunctionTriggers
     }
 
     [Function(nameof(ResetResponseTrigger))]
-    public async Task<HttpResponseData> ResetResponseTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/respond/reset")] HttpRequestData req)
+    public async Task<IActionResult> ResetResponseTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/respond/reset")] HttpRequest req,
+        string instance)
     {
         var model = await req.ReadBodyAsync<ResetResponseRequest>();
-        var instance = req.GetRouteValue("instance");
 
         _logger.LogInformation("Reset response for game: {GameName}", instance);
 
@@ -237,30 +225,27 @@ public class FunctionTriggers
     }
 
     [Function(nameof(RespondTrigger))]
-    public async Task<HttpResponseData> RespondTrigger(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/respond")] HttpRequestData req)
+    public async Task<IActionResult> RespondTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/round/respond")] HttpRequest req,
+        string instance)
     {
         var model = await req.ReadBodyAsync<RespondModel>();
-        var instance = req.GetRouteValue("instance");
 
         _logger.LogInformation("Respond for game: {GameName}", instance);
 
         return await Orchestrate(req, instance!, game => game.Respond(model!));
     }
 
-    private async Task<HttpResponseData> Orchestrate(HttpRequestData req, string name, Action<Game> action)
+    private async Task<IActionResult> Orchestrate(HttpRequest req, string name, Action<Game> action)
     {
         await using var state = await _entityClient.GetLocked<Game>("game", name.Slugify());
 
         action?.Invoke(state.Entity);
 
         await state.Flush();
-        
-        // Notify state change for long polling
+
         _gameStateService.NotifyGameUpdate(name, state.Entity.Version);
 
-        var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(state.Entity);
-        return response;
+        return new OkObjectResult(state.Entity);
     }
 }
