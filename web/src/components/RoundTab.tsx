@@ -124,9 +124,13 @@ const RoundTab: React.FC = () => {
       .filter((card): card is string => card !== null);
   };
 
-  const handleCardClick = (index: number, playerId: number) => {
-    if (!partOfCurrentGame || hasVoted || !currentRound) return;
+  const handleCardClick = (index: number) => {
+    if (!partOfCurrentGame || hasVoted || !currentRound || currentRound.isWon) return;
     setSelectedCardIndex(index);
+  };
+
+  const handleVoteClick = (playerId: number) => {
+    if (!partOfCurrentGame || hasVoted || !currentRound) return;
     handleVote(playerId);
   };
 
@@ -175,9 +179,9 @@ const RoundTab: React.FC = () => {
                 } ${
                   isSelected ? 'selected' : ''
                 }`}
-                onMouseEnter={() => !isWinner && setHoveredCardIndex(index)}
+                onMouseEnter={() => !isWinner && !currentRound.isWon && setHoveredCardIndex(index)}
                 onMouseLeave={() => setHoveredCardIndex(null)}
-                onClick={() => handleCardClick(index, response.playerId)}
+                onClick={() => handleCardClick(index)}
               >
                 <div className="response-card-content">
                   {responseCards.map((cardText, cardIndex) => (
@@ -198,6 +202,19 @@ const RoundTab: React.FC = () => {
                     <div className="vote-count">
                       {voteCount} {voteCount === 1 ? 'vote' : 'votes'}
                     </div>
+                  )}
+                  {/* Vote button - only show if selected and can vote */}
+                  {isSelected && !hasVoted && !currentRound.isWon && partOfCurrentGame && (
+                    <button
+                      type="button"
+                      className="btn btn-success btn-sm mt-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleVoteClick(response.playerId);
+                      }}
+                    >
+                      🗳️ Vote for this card
+                    </button>
                   )}
                 </div>
               </div>

@@ -147,7 +147,27 @@ public class FunctionTriggers
 
         _logger.LogInformation("Next round for game: {GameName}", instance);
 
-        return await Orchestrate(req, instance!, game => game.NextRound(prompt));
+        return await Orchestrate(req, instance!, game => {
+            // Calculate how many cards need to be replaced
+            var cardCount = 0;
+            if (game.CurrentRound?.Responses != null)
+            {
+                foreach (var response in game.CurrentRound.Responses)
+                {
+                    if (response.Responses != null)
+                    {
+                        cardCount += response.Responses.Count;
+                    }
+                }
+            }
+
+            // Generate new cards
+            var newCards = _cardService.ShuffleResponses(cardCount);
+            
+            // Move to next round and replace played cards
+            game.NextRound(prompt);
+            game.ReplacePlayedCards(newCards);
+        });
     }
 
     [Function(nameof(NewRoundTrigger))]
