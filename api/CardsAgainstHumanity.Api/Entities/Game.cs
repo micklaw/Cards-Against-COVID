@@ -137,6 +137,59 @@ namespace CardsAgainstHumanity.Api.Entities
             return NewRound(prompt);
         }
 
+        public Game ReplacePlayedCards(IList<string> newCards)
+        {
+            if (PreviousRounds == null || !PreviousRounds.Any())
+            {
+                return this;
+            }
+
+            var lastRound = PreviousRounds.Last();
+            if (lastRound?.Responses == null)
+            {
+                return this;
+            }
+
+            // Calculate total cards needed
+            var totalCardsNeeded = lastRound.Responses
+                .Where(r => r.Responses != null)
+                .Sum(r => r.Responses.Count);
+
+            // Validate we have enough cards
+            if (newCards.Count < totalCardsNeeded)
+            {
+                // Log or handle insufficient cards - for now just return to avoid partial replacement
+                return this;
+            }
+
+            // For each player who responded in the last round, replace their played cards
+            foreach (var response in lastRound.Responses)
+            {
+                var player = Players.FirstOrDefault(p => p.Id == response.PlayerId);
+                if (player != null && response.Responses != null && response.Responses.Any())
+                {
+                    // Sort indices in descending order to avoid index shifting issues
+                    var sortedIndices = response.Responses.OrderByDescending(i => i).ToList();
+                    
+                    foreach (var cardIndex in sortedIndices)
+                    {
+                        if (cardIndex < player.Cards.Count && newCards.Any())
+                        {
+                            // Remove the played card
+                            player.Cards.RemoveAt(cardIndex);
+                            // Add a new card at the same position
+                            player.Cards.Insert(cardIndex, newCards.First());
+                            // Remove the used new card from the list
+                            newCards.RemoveAt(0);
+                        }
+                    }
+                }
+            }
+
+            IncrementVersion();
+            return this;
+        }
+
         public Game Vote(VoteModel model)
         {
             CurrentRound?.Vote(model.PlayerId, model.VoteeId);

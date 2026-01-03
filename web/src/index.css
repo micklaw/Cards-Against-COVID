@@ -614,8 +614,9 @@
 
   /* Selected state */
   .response-card-item.selected .game-card {
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6), 0 1rem 2rem rgba(59, 130, 246, 0.3) !important;
-    @apply border-2 border-primary;
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.8), 0 1.5rem 3rem rgba(59, 130, 246, 0.5) !important;
+    @apply border-[3px] border-primary;
+    transform: scale(1.02);
   }
 
   /* Winner state */
@@ -671,6 +672,16 @@
   .card-stack-item.winner {
     transform: translateX(-50%);
   }
+
+  .player-cards-stack {
+    @apply gap-4 px-4;
+    grid-template-columns: repeat(2, auto);
+  }
+
+  .response-cards-grid {
+    @apply gap-4 px-4;
+    grid-template-columns: repeat(2, auto);
+  }
 }
 
 @media (max-width: 480px) {
@@ -694,17 +705,13 @@
   .card-title {
     font-size: 1.125rem !important;
   }
-}
 
-@media (max-width: 768px) {
   .player-cards-stack {
-    @apply gap-4;
-    grid-template-columns: repeat(2, auto);
+    @apply px-3;
   }
 
   .response-cards-grid {
-    @apply gap-4;
-    grid-template-columns: repeat(2, auto);
+    @apply px-3;
   }
 }
 
