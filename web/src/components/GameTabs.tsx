@@ -7,6 +7,7 @@ import StatsTab from './StatsTab';
 import RoundTab from './RoundTab';
 import CardsTab from './CardsTab';
 import ThemeToggle from './ThemeToggle';
+import ShareButton from './ShareButton';
 import { Link } from 'react-router';
 
 interface NavTab {
@@ -43,6 +44,7 @@ const GameTabs: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <h3 className="masthead-brand">{game.name}</h3>
             <div className="flex items-center gap-2">
+              <ShareButton gameUrl={game.url} />
               <Link className="btn btn-primary btn-sm" to="/">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
