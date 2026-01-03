@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface ShareButtonProps {
   gameUrl: string;
@@ -6,6 +6,25 @@ interface ShareButtonProps {
 
 const ShareButton: React.FC<ShareButtonProps> = ({ gameUrl }) => {
   const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<number | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const copyToClipboard = async (url: string) => {
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = window.setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleShare = async () => {
     const fullUrl = `${window.location.origin}/game/${gameUrl}`;
@@ -20,16 +39,12 @@ const ShareButton: React.FC<ShareButtonProps> = ({ gameUrl }) => {
         });
       } else {
         // Fallback to clipboard
-        await navigator.clipboard.writeText(fullUrl);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        await copyToClipboard(fullUrl);
       }
     } catch {
       // If share is cancelled or clipboard fails, try clipboard anyway
       try {
-        await navigator.clipboard.writeText(fullUrl);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        await copyToClipboard(fullUrl);
       } catch (clipboardError) {
         console.error('Failed to share:', clipboardError);
       }
