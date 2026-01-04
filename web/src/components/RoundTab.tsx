@@ -9,6 +9,7 @@ import {
   nextRound,
   vote
 } from '../store/gameSlice';
+import { isGameCreator } from '../utils/cookies';
 import Card, { CardType } from './Card';
 
 interface ControlButtonsProps {
@@ -16,29 +17,28 @@ interface ControlButtonsProps {
     isWon: boolean;
     hasResponses: boolean;
   };
+  isCreator: boolean;
   onNewPrompt: () => void;
-  onNewRound: () => void;
   onReveal: () => void;
   onNext: () => void;
 }
 
 const ControlButtons: React.FC<ControlButtonsProps> = ({
   currentRound,
+  isCreator,
   onNewPrompt,
-  onNewRound,
   onReveal,
   onNext
 }) => (
   <div className="flex justify-center gap-2 flex-wrap">
     {!currentRound.isWon && (
       <>
-        <button type="button" className="btn btn-primary" onClick={onNewPrompt}>
-          🔄 Change
-        </button>
-        <button type="button" className="btn btn-primary" onClick={onNewRound}>
-          🔁 Restart
-        </button>
-        {currentRound.hasResponses && (
+        {isCreator && (
+          <button type="button" className="btn btn-primary" onClick={onNewPrompt}>
+            🔄 Change
+          </button>
+        )}
+        {isCreator && currentRound.hasResponses && (
           <button type="button" className="btn btn-success" onClick={onReveal}>
             🏆 Winner
           </button>
@@ -65,6 +65,7 @@ const RoundTab: React.FC = () => {
   const partOfCurrentGame = currentPlayerId !== null;
   const currentRound = game.currentRound;
   const hasVoted = currentRound?.voted.includes(currentPlayerId || -1) || false;
+  const isCreator = isGameCreator(game.url);
 
   const getPlayerName = (playerId: number, useIsWon = false): string => {
     if (!game.players || playerId < 0) return 'Unknown';
@@ -138,7 +139,7 @@ const RoundTab: React.FC = () => {
     return (
       <div>
         <p className="mb-4 text-gray-600 dark:text-gray-300">No fun has begun</p>
-        {partOfCurrentGame && (
+        {partOfCurrentGame && isCreator && (
           <div className="mb-4">
             <button type="button" className="btn btn-primary" onClick={handleNewRound}>
               New Round
@@ -228,8 +229,8 @@ const RoundTab: React.FC = () => {
         <div>
           <ControlButtons
             currentRound={currentRound}
+            isCreator={isCreator}
             onNewPrompt={handleNewPrompt}
-            onNewRound={handleNewRound}
             onReveal={handleReveal}
             onNext={handleNext}
           />
