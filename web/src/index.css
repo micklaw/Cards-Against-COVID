@@ -95,7 +95,7 @@
   
   /* Navigation */
   .nav-masthead {
-    @apply flex justify-center gap-0;
+    @apply flex justify-center gap-0 px-2;
   }
   
   .nav-link {
@@ -505,7 +505,7 @@
 
   /* Player Cards Stack (CardsTab) */
   .player-cards-stack-container {
-    @apply w-full mt-4;
+    @apply w-full mt-4 px-4;
   }
 
   .player-cards-stack {
@@ -545,7 +545,7 @@
 
   /* Response Cards Grid (RoundTab) */
   .response-cards-container {
-    @apply w-full mt-4;
+    @apply w-full mt-4 px-4;
   }
 
   .response-cards-grid {
@@ -674,12 +674,12 @@
   }
 
   .player-cards-stack {
-    @apply gap-4 px-4;
+    @apply gap-4;
     grid-template-columns: repeat(2, auto);
   }
 
   .response-cards-grid {
-    @apply gap-4 px-4;
+    @apply gap-4;
     grid-template-columns: repeat(2, auto);
   }
 }
@@ -707,11 +707,11 @@
   }
 
   .player-cards-stack {
-    @apply px-3;
+    grid-template-columns: repeat(2, auto);
   }
 
   .response-cards-grid {
-    @apply px-3;
+    grid-template-columns: repeat(2, auto);
   }
 }
 
