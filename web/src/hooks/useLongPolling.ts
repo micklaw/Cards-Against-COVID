@@ -3,10 +3,10 @@ import { useEffect, useRef } from 'react';
 import { gameApi } from '../api/gameApi';
 import type { Game } from '../types/game';
 
-const MIN_POLL_INTERVAL = 3000;     // Start at 3 seconds
-const MAX_POLL_INTERVAL = 15000;    // Max out at 15 seconds
+const MIN_POLL_INTERVAL = 1500;     // Start at 3 seconds
+const MAX_POLL_INTERVAL = 10000;    // Max out at 15 seconds
 const BACKOFF_MULTIPLIER = 1.5;     // Increase by 50% each time
-const POST_UPDATE_DELAY = 5000;     // Wait 5 seconds after receiving an update
+const POST_UPDATE_DELAY = 3000;     // Wait 5 seconds after receiving an update
 
 // Global tracking to prevent duplicate polling loops across React Strict Mode remounts
 const activePollers = new Set<string>();
