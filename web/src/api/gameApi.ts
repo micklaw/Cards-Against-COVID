@@ -1,7 +1,7 @@
 // API client for backend communication
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
-import type { Game, PollingResponse } from '../types/game';
+import type { Game, PollingResponse, ChatMessage } from '../types/game';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -124,6 +124,41 @@ class GameApi {
     const response = await this.client.post<Game>(
       `/game/${gameUrl}/player/cards/shuffle`,
       { playerId }
+    );
+    return response.data;
+  }
+
+  // Get chat messages
+  async getChatMessages(
+    gameUrl: string,
+    params?: { beforeMessageId?: string; afterMessageId?: string; limit?: number }
+  ): Promise<ChatMessage[]> {
+    const response = await this.client.get<ChatMessage[]>(
+      `/game/${gameUrl}/chat/messages`,
+      { params }
+    );
+    return response.data;
+  }
+
+  // Post chat message
+  async postChatMessage(
+    gameUrl: string,
+    userId: number,
+    content: string,
+    quotedMessageId?: string
+  ): Promise<ChatMessage> {
+    const response = await this.client.post<ChatMessage>(
+      `/game/${gameUrl}/chat/messages`,
+      { userId, content, quotedMessageId }
+    );
+    return response.data;
+  }
+
+  // Set chat settings
+  async setChatSettings(gameUrl: string, isChatEnabled: boolean): Promise<Game> {
+    const response = await this.client.put<Game>(
+      `/game/${gameUrl}/chat/settings`,
+      { isChatEnabled }
     );
     return response.data;
   }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { selectGame, selectCurrentPlayerId, addPlayer, openGame, closeGame, finishGame } from '../store/gameSlice';
+import { selectGame, selectCurrentPlayerId, addPlayer, openGame, closeGame, finishGame, setChatSettings } from '../store/gameSlice';
 import { isGameCreator } from '../utils/cookies';
 
 const StatsTab: React.FC = () => {
@@ -52,6 +52,12 @@ const StatsTab: React.FC = () => {
   const handleFinish = () => {
     if (game) {
       dispatch(finishGame(game.url));
+    }
+  };
+
+  const handleToggleChat = () => {
+    if (game) {
+      dispatch(setChatSettings({ gameUrl: game.url, isChatEnabled: !game.isChatEnabled }));
     }
   };
 
@@ -132,6 +138,14 @@ const StatsTab: React.FC = () => {
                     🔓 Open
                   </button>
                 )}
+                <button 
+                  type="button" 
+                  className={`btn ${game.isChatEnabled ? 'btn-success' : 'btn-secondary'}`}
+                  onClick={handleToggleChat}
+                  title={game.isChatEnabled ? 'Disable chat' : 'Enable chat'}
+                >
+                  💬 Chat {game.isChatEnabled ? 'On' : 'Off'}
+                </button>
                 <button type="button" className="btn btn-primary" onClick={handleFinish}>
                   🏁 End
                 </button>

@@ -1,5 +1,6 @@
 using ActorTableEntities;
 using CardsAgainstHumanity.Api.Services;
+using CardsAgainstHumanity.Application.Interfaces;
 using CardsAgainstHumanity.Application.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
@@ -27,6 +28,7 @@ builder.Services.AddActorTableEntities(Environment.GetEnvironmentVariable("Azure
 
 // Register application services
 builder.Services.AddSingleton<ICardService, CardService>();
+builder.Services.AddSingleton<IChatService, ChatService>();
 builder.Services.AddSingleton<IGameStateService, GameStateService>();
 builder.Services.AddSingleton<IPollingService, PollingService>();
 

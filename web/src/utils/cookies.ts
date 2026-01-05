@@ -2,6 +2,7 @@
 
 const PLAYER_COOKIE_PREFIX = 'cac_player_';
 const CREATOR_COOKIE_PREFIX = 'cac_creator_';
+const CHAT_VISIT_COOKIE_PREFIX = 'cac_chat_visit_';
 
 /**
  * Get the cookie name for a specific game instance
@@ -80,4 +81,41 @@ export function isGameCreator(gameUrl: string): boolean {
   }
   
   return false;
+}
+
+/**
+ * Get the cookie name for chat visit timestamp
+ */
+function getChatVisitCookieName(gameUrl: string): string {
+  return `${CHAT_VISIT_COOKIE_PREFIX}${gameUrl}`;
+}
+
+/**
+ * Set the last chat visit timestamp for a game
+ */
+export function setChatVisitCookie(gameUrl: string): void {
+  const cookieName = getChatVisitCookieName(gameUrl);
+  const timestamp = new Date().toISOString();
+  // Set cookie to expire in 7 days
+  const expires = new Date();
+  expires.setDate(expires.getDate() + 7);
+  document.cookie = `${cookieName}=${timestamp}; expires=${expires.toUTCString()}; path=/; SameSite=Strict`;
+}
+
+/**
+ * Get the last chat visit timestamp for a game
+ */
+export function getChatVisitCookie(gameUrl: string): Date | null {
+  const cookieName = getChatVisitCookieName(gameUrl);
+  const cookies = document.cookie.split(';');
+  
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === cookieName) {
+      const timestamp = new Date(value);
+      return isNaN(timestamp.getTime()) ? null : timestamp;
+    }
+  }
+  
+  return null;
 }
