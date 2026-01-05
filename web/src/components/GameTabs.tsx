@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAppSelector } from '../store/hooks';
 import { selectGame, selectCurrentPlayerId } from '../store/gameSlice';
 import { selectMessages } from '../store/chatSlice';
@@ -33,36 +33,30 @@ const GameTabs: React.FC = () => {
     { tab: Tab.Chat, title: 'Chat', active: false }
   ]);
 
-  const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+  // Track if chat tab is currently active
+  const isChatTabActive = tabs.find(t => t.tab === Tab.Chat)?.active || false;
 
-  // Check for unread messages
-  useEffect(() => {
-    if (!game || messages.length === 0) {
-      setHasUnreadMessages(false);
-      return;
+  // Calculate unread messages using memoized value
+  const hasUnreadMessages = useMemo(() => {
+    // Don't show unread when chat is active
+    if (!game || messages.length === 0 || isChatTabActive) {
+      return false;
     }
 
     const lastVisit = getChatVisitCookie(game.url);
     if (!lastVisit) {
-      setHasUnreadMessages(messages.length > 0);
-      return;
+      return messages.length > 0;
     }
 
     // Check if there are any messages after the last visit
-    const hasUnread = messages.some(msg => new Date(msg.timestamp) > lastVisit);
-    setHasUnreadMessages(hasUnread);
-  }, [messages, game]);
+    return messages.some(msg => new Date(msg.timestamp) > lastVisit);
+  }, [messages, game, isChatTabActive]);
 
   const handleToggle = (selectedTab: NavTab) => {
     setTabs(tabs.map(tab => ({
       ...tab,
       active: tab.tab === selectedTab.tab
     })));
-
-    // Clear unread badge when visiting chat tab
-    if (selectedTab.tab === Tab.Chat) {
-      setHasUnreadMessages(false);
-    }
   };
 
   if (!game) return null;
