@@ -50,6 +50,8 @@ namespace CardsAgainstHumanity.Api.Entities
 
         public bool IsOver { get; set; }
 
+        public bool IsChatEnabled { get; set; } = false;
+
         public Game Create(string name)
         {
             if (string.IsNullOrWhiteSpace(Url))
@@ -230,6 +232,13 @@ namespace CardsAgainstHumanity.Api.Entities
         public Game ResetResponse(ResetResponseRequest model)
         {
             CurrentRound?.ResetResponse(model.PlayerId);
+            IncrementVersion();
+            return this;
+        }
+
+        public Game SetChatEnabled(bool enabled)
+        {
+            IsChatEnabled = enabled;
             IncrementVersion();
             return this;
         }

@@ -123,6 +123,13 @@ export const shuffleCards = createAsyncThunk(
   }
 );
 
+export const setChatSettings = createAsyncThunk(
+  'game/setChatSettings',
+  async ({ gameUrl, isChatEnabled }: { gameUrl: string; isChatEnabled: boolean }) => {
+    return await gameApi.setChatSettings(gameUrl, isChatEnabled);
+  }
+);
+
 const gameSlice = createSlice({
   name: 'game',
   initialState,
@@ -197,6 +204,7 @@ const gameSlice = createSlice({
       finishGame,
       replaceCard,
       shuffleCards,
+      setChatSettings,
     ];
 
     updateGameActions.forEach((action) => {

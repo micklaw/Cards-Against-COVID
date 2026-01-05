@@ -3,6 +3,7 @@ using CardsAgainstHumanity.Api.Entities;
 using CardsAgainstHumanity.Api.Extensions;
 using CardsAgainstHumanity.Api.Services;
 using CardsAgainstHumanity.Application.Extensions;
+using CardsAgainstHumanity.Application.Interfaces;
 using CardsAgainstHumanity.Application.Models.Api;
 using CardsAgainstHumanity.Application.Models.Requests;
 using CardsAgainstHumanity.Application.Services;
@@ -21,6 +22,7 @@ public class FunctionTriggers
     private readonly IActorTableEntityClient _entityClient;
     private readonly IGameStateService _gameStateService;
     private readonly IPollingService _pollingService;
+    private readonly IChatService _chatService;
     private readonly ILogger<FunctionTriggers> _logger;
 
     public FunctionTriggers(
@@ -28,12 +30,14 @@ public class FunctionTriggers
         IActorTableEntityClient entityClient,
         IGameStateService gameStateService,
         IPollingService pollingService,
+        IChatService chatService,
         ILogger<FunctionTriggers> logger)
     {
         _cardService = cardService;
         _entityClient = entityClient;
         _gameStateService = gameStateService;
         _pollingService = pollingService;
+        _chatService = chatService;
         _logger = logger;
     }
 
@@ -244,6 +248,100 @@ public class FunctionTriggers
         _logger.LogInformation("Respond for game: {GameName}", instance);
 
         return await Orchestrate(req, instance!, game => game.Respond(model!));
+    }
+
+    [Function(nameof(GetChatMessagesTrigger))]
+    public async Task<IActionResult> GetChatMessagesTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = RoutePrefix + "/chat/messages")] HttpRequest req,
+        string instance)
+    {
+        _logger.LogInformation("Getting chat messages for game: {GameName}", instance);
+
+        var beforeMessageId = req.Query["beforeMessageId"].ToString();
+        var afterMessageId = req.Query["afterMessageId"].ToString();
+        
+        if (!int.TryParse(req.Query["limit"], out var limit) || limit <= 0 || limit > 100)
+        {
+            limit = 20;
+        }
+
+        var chat = await _entityClient.Get<Chat>("entitychat", instance.Slugify());
+        
+        if (chat == null)
+        {
+            // Return empty list if no chat exists yet
+            return new OkObjectResult(new List<ChatMessage>());
+        }
+
+        var messages = chat.GetMessages(beforeMessageId, afterMessageId, limit);
+        return new OkObjectResult(messages);
+    }
+
+    [Function(nameof(PostChatMessageTrigger))]
+    public async Task<IActionResult> PostChatMessageTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = RoutePrefix + "/chat/messages")] HttpRequest req,
+        string instance)
+    {
+        var model = await req.ReadBodyAsync<PostChatMessageRequest>();
+        
+        if (model == null)
+        {
+            return new BadRequestObjectResult(new { error = "Invalid request body" });
+        }
+
+        _logger.LogInformation("Posting chat message for game: {GameName}, User: {UserId}", instance, model.UserId);
+
+        // Sanitize and validate content
+        var sanitizedContent = _chatService.SanitizeContent(model.Content);
+        if (!_chatService.ValidateMessage(sanitizedContent))
+        {
+            return new BadRequestObjectResult(new { error = "Message content is invalid or exceeds 140 characters" });
+        }
+
+        // Check if game exists and chat is enabled
+        var game = await _entityClient.Get<Game>("game", instance.Slugify());
+        if (game == null)
+        {
+            return new NotFoundResult();
+        }
+
+        if (!game.IsChatEnabled || game.IsOver)
+        {
+            return new BadRequestObjectResult(new { error = "Chat is disabled for this game" });
+        }
+
+        // Get or create chat entity
+        await using var state = await _entityClient.GetLocked<Chat>("entitychat", instance.Slugify());
+        
+        if (state.Entity.GameId == string.Empty)
+        {
+            state.Entity.GameId = instance.Slugify();
+        }
+
+        state.Entity.AddMessage(model.UserId, sanitizedContent, model.QuotedMessageId);
+        
+        await state.Flush();
+
+        // Return the newly added message
+        var newMessage = state.Entity.Messages.Last();
+        return new OkObjectResult(newMessage);
+    }
+
+    [Function(nameof(SetChatSettingsTrigger))]
+    public async Task<IActionResult> SetChatSettingsTrigger(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = RoutePrefix + "/chat/settings")] HttpRequest req,
+        string instance)
+    {
+        var model = await req.ReadBodyAsync<ChatSettingsRequest>();
+        
+        if (model == null)
+        {
+            return new BadRequestObjectResult(new { error = "Invalid request body" });
+        }
+
+        _logger.LogInformation("Setting chat enabled to {Enabled} for game: {GameName}", model.IsChatEnabled, instance);
+
+        return await Orchestrate(req, instance!, game => game.SetChatEnabled(model.IsChatEnabled));
     }
 
     private async Task<IActionResult> Orchestrate(HttpRequest req, string name, Action<Game> action)

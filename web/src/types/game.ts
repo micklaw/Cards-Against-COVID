@@ -31,6 +31,7 @@ export interface Game {
   previousRounds: Round[];
   isOpen: boolean;
   isOver: boolean;
+  isChatEnabled: boolean;
   score: Record<number, number>;
 }
 
@@ -44,10 +45,20 @@ export interface ApiError {
   status: number;
 }
 
+export interface ChatMessage {
+  messageId: string;
+  gameId: string;
+  userId: number;
+  content: string;
+  quotedMessageId?: string;
+  timestamp: string;
+}
+
 export const Tab = {
   Stats: 'stats',
   Round: 'round',
-  Cards: 'cards'
+  Cards: 'cards',
+  Chat: 'chat'
 } as const;
 
 export type Tab = typeof Tab[keyof typeof Tab];

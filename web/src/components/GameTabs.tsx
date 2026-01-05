@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppSelector } from '../store/hooks';
 import { selectGame, selectCurrentPlayerId } from '../store/gameSlice';
+import { selectMessages } from '../store/chatSlice';
 import { Tab } from '../types/game';
 import GameTab from './GameTab';
 import StatsTab from './StatsTab';
 import RoundTab from './RoundTab';
 import CardsTab from './CardsTab';
+import ChatTab from './ChatTab';
 import ThemeToggle from './ThemeToggle';
 import ShareButton from './ShareButton';
 import { Link } from 'react-router';
+import { getChatVisitCookie } from '../utils/cookies';
 
 interface NavTab {
   tab: Tab;
@@ -19,20 +22,47 @@ interface NavTab {
 const GameTabs: React.FC = () => {
   const game = useAppSelector(selectGame);
   const currentPlayerId = useAppSelector(selectCurrentPlayerId);
+  const messages = useAppSelector(selectMessages);
   
   const partOfCurrentGame = currentPlayerId !== null;
   
   const [tabs, setTabs] = useState<NavTab[]>([
     { tab: Tab.Stats, title: 'Stats', active: true },
     { tab: Tab.Round, title: 'Round', active: false },
-    { tab: Tab.Cards, title: 'Cards', active: false }
+    { tab: Tab.Cards, title: 'Cards', active: false },
+    { tab: Tab.Chat, title: 'Chat', active: false }
   ]);
+
+  const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+
+  // Check for unread messages
+  useEffect(() => {
+    if (!game || messages.length === 0) {
+      setHasUnreadMessages(false);
+      return;
+    }
+
+    const lastVisit = getChatVisitCookie(game.url);
+    if (!lastVisit) {
+      setHasUnreadMessages(messages.length > 0);
+      return;
+    }
+
+    // Check if there are any messages after the last visit
+    const hasUnread = messages.some(msg => new Date(msg.timestamp) > lastVisit);
+    setHasUnreadMessages(hasUnread);
+  }, [messages, game]);
 
   const handleToggle = (selectedTab: NavTab) => {
     setTabs(tabs.map(tab => ({
       ...tab,
       active: tab.tab === selectedTab.tab
     })));
+
+    // Clear unread badge when visiting chat tab
+    if (selectedTab.tab === Tab.Chat) {
+      setHasUnreadMessages(false);
+    }
   };
 
   if (!game) return null;
@@ -78,10 +108,13 @@ const GameTabs: React.FC = () => {
               return (
                 <a
                   key={tab.tab}
-                  className={`nav-link ${tab.active ? 'active' : ''}`}
+                  className={`nav-link ${tab.active ? 'active' : ''} relative`}
                   onClick={() => handleToggle(tab)}
                 >
                   {tab.title}
+                  {tab.tab === Tab.Chat && hasUnreadMessages && !tab.active && (
+                    <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                  )}
                 </a>
               );
             })}
@@ -95,6 +128,7 @@ const GameTabs: React.FC = () => {
             {tab.tab === Tab.Stats && <StatsTab />}
             {tab.tab === Tab.Round && <RoundTab />}
             {tab.tab === Tab.Cards && <CardsTab />}
+            {tab.tab === Tab.Chat && <ChatTab />}
           </GameTab>
         ))}
       </main>
