@@ -103,9 +103,10 @@ const chatSlice = createSlice({
 
     // Fetch newer messages
     builder.addCase(fetchNewerMessages.fulfilled, (state, action) => {
-      // Append newer messages and deduplicate
+      // Append newer messages and deduplicate using Set for O(1) lookups
+      const existingIds = new Set(state.messages.map(msg => msg.messageId));
       const newMessages = action.payload.filter(
-        newMsg => !state.messages.some(msg => msg.messageId === newMsg.messageId)
+        newMsg => !existingIds.has(newMsg.messageId)
       );
       state.messages = [...state.messages, ...newMessages];
     });
@@ -113,7 +114,8 @@ const chatSlice = createSlice({
     // Post message
     builder.addCase(postMessage.fulfilled, (state, action) => {
       // Add the new message if not already present
-      if (!state.messages.some(msg => msg.messageId === action.payload.messageId)) {
+      const exists = state.messages.some(msg => msg.messageId === action.payload.messageId);
+      if (!exists) {
         state.messages.push(action.payload);
       }
     });

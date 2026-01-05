@@ -24,9 +24,9 @@ namespace CardsAgainstHumanity.Api.Entities
 
         public Chat AddMessage(int userId, string content, string? quotedMessageId)
         {
-            // Generate unique message ID (timestamp-based with counter)
+            // Generate unique message ID using GUID
             var timestamp = DateTime.UtcNow;
-            var messageId = $"{timestamp.Ticks}-{Messages.Count}";
+            var messageId = $"{timestamp:yyyyMMddHHmmss}-{Guid.NewGuid():N}";
 
             var message = new ChatMessage
             {

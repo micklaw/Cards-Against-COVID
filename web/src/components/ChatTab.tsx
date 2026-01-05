@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
+import type { ChatMessage } from '../types/game';
 import {
   fetchInitialMessages,
   fetchOlderMessages,
@@ -29,6 +30,13 @@ const ChatTab: React.FC = () => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const isChatDisabled = !game?.isChatEnabled || game?.isOver || !currentPlayerId;
+
+  // Create a message map for O(1) lookups
+  const messageMap = useMemo(() => {
+    const map = new Map<string, ChatMessage>();
+    messages.forEach(msg => map.set(msg.messageId, msg));
+    return map;
+  }, [messages]);
 
   // Fetch initial messages on mount
   useEffect(() => {
@@ -110,7 +118,7 @@ const ChatTab: React.FC = () => {
   };
 
   const getQuotedMessage = (messageId: string) => {
-    return messages.find(m => m.messageId === messageId);
+    return messageMap.get(messageId);
   };
 
   const getPlayerName = (userId: number): string => {

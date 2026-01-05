@@ -322,8 +322,12 @@ public class FunctionTriggers
         
         await state.Flush();
 
-        // Return the newly added message
-        var newMessage = state.Entity.Messages.Last();
+        // Return the newly added message (which was just added, so it's guaranteed to be last)
+        var newMessage = state.Entity.Messages.LastOrDefault();
+        if (newMessage == null)
+        {
+            return new StatusCodeResult(500);
+        }
         return new OkObjectResult(newMessage);
     }
 
